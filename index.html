@@ -1,0 +1,136 @@
+ <!DOCTYPE html>
+ <html lang="zh-TW">
+ <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Artting 的小工具站</title>
+   <link rel="stylesheet" href="./style.css">
+ </head>
+ <body>
+   <!-- Signboard -->
+   <div class="signboard">
+     <div class="signboard-chain"></div>
+     <div class="signboard-ring"></div>
+     <div class="signboard-body">
+       <h1>Artting 小工具站</h1>
+     </div>
+   </div>
+  <div class="top-bar">
+     <div class="custom-select" id="langSelectWrapper">
+       <button class="select-button" id="langButton">
+         <span id="langText">中文</span>
+         <span class="arrow">&#9660;</span>
+       </button>
+       <div class="select-options" id="langOptions">
+         <div class="option selected" data-value="zh-TW">繁體介面</div>
+         <div class="option" data-value="zh-CN">简体介面</div>
+         <div class="option" data-value="en">English UI</div>
+       </div>
+     </div>
+    <button id="themeToggle" class="theme-btn">☀️ 淺色</button>
+   </div>
+ 
+   <!-- Center action buttons -->
+   <div class="btn-group">
+     <a class="tool-btn tool-accent" href="./tools/GBK_BIG5_UI.html" target="_blank" rel="noopener noreferrer">
+       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+         <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+       </svg>
+        <span class="btn-label" data-i18n="converter">繁簡轉換器</span>
+     </a>
+ 
+       <a class="tool-btn forum-accent" href="./MessageBoard/mainBoard.html" target="_blank" rel="noopener noreferrer">
+       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+       </svg>
+        <span class="btn-label" data-i18n="board">留言板</span>
+     </a>
+   </div>
+ <script>
+   (function(){
+     const i18n={
+       "zh-TW":{
+         "converter":"繁簡轉換器",
+         "board":"留言板",
+         "t-light":"☀️ 淺色",
+         "t-trans":"☀️ 透明",
+         "t-dark":"🌙 深色",
+         "t-dark-trans":"🌙 透明",
+         "lang":"中文"
+       },
+       "zh-CN":{
+         "converter":"繁简转换器",
+         "board":"留言板",
+         "t-light":"☀️ 浅色",
+         "t-trans":"☀️ 透明",
+         "t-dark":"🌙 深色",
+         "t-dark-trans":"🌙 透明",
+         "lang":"简体中文"
+       },
+       "en":{
+         "converter":"Converter",
+         "board":"Message Board",
+         "t-light":"☀️ Light",
+         "t-trans":"☀️ Transparent",
+         "t-dark":"🌙 Dark",
+         "t-dark-trans":"🌙 Transparent",
+         "lang":"English"
+       }
+     };
+     let curLang=localStorage.getItem("lang")||"zh-TW";
+     if(!i18n[curLang])curLang="zh-TW";
+     const themeBtn=document.getElementById("themeToggle");
+     const langSelectWrapper=document.getElementById("langSelectWrapper");
+     const langButton=document.getElementById("langButton");
+     const langText=document.getElementById("langText");
+     const langOptions=document.getElementById("langOptions");
+     function setTheme(mode){
+       if(!i18n[curLang])curLang="zh-TW";
+       document.body.classList.remove("dark","transparent");
+       if(mode==="light-transparent"){document.body.classList.add("transparent")}
+       else if(mode==="dark"){document.body.classList.add("dark")}
+       else if(mode==="dark-transparent"){document.body.classList.add("dark","transparent")}
+       localStorage.setItem("theme",mode);
+       const labels={"light":i18n[curLang]["t-light"],"light-transparent":i18n[curLang]["t-trans"],"dark":i18n[curLang]["t-dark"],"dark-transparent":i18n[curLang]["t-dark-trans"]};
+       themeBtn.textContent=labels[mode]||i18n[curLang]["t-light"];
+     }
+     function applyLang(lang){
+       curLang=lang;
+       localStorage.setItem("lang",lang);
+       Array.from(document.querySelectorAll("[data-i18n]")).forEach(function(el){
+         const key=el.dataset.i18n;
+         if(i18n[lang][key])el.textContent=i18n[lang][key];
+       });
+       langText.textContent=i18n[lang]["lang"];
+       Array.from(langOptions.querySelectorAll(".option")).forEach(function(o){
+         o.classList.toggle("selected",o.dataset.value===lang);
+       });
+       setTheme(localStorage.getItem("theme")||"light");
+     }
+     setTheme(localStorage.getItem("theme")||"light");
+     applyLang(curLang);
+     themeBtn.addEventListener("click",function(){
+       const isDark=document.body.classList.contains("dark");
+       const isTransparent=document.body.classList.contains("transparent");
+       if(!isDark&&!isTransparent)setTheme("light-transparent");
+       else if(!isDark&&isTransparent)setTheme("dark");
+       else if(isDark&&!isTransparent)setTheme("dark-transparent");
+       else setTheme("light");
+     });
+     langButton.addEventListener("click",function(e){
+       e.stopPropagation();
+       langSelectWrapper.classList.toggle("open");
+     });
+     Array.from(langOptions.querySelectorAll(".option")).forEach(function(opt){
+       opt.addEventListener("click",function(){
+         langSelectWrapper.classList.remove("open");
+         applyLang(this.dataset.value);
+       });
+     });
+     document.addEventListener("click",function(){
+       langSelectWrapper.classList.remove("open");
+     });
+   })();
+ </script>
+  </body>
+ </html>

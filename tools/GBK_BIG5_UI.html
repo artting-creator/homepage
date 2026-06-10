@@ -1,0 +1,2483 @@
+﻿<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>繁簡轉換工具</title>
+
+<script src="full.js"></script>
+<!--
+// opencc-js[](https://github.com/nk2028/opencc-js)
+// License: MIT
+// Copyright (c) nk2028 和貢獻者
+// license：https://github.com/nk2028/opencc-js/blob/main/LICENSE
+ -->
+<!-- 
+// iconv-browser.js - 自製瀏覽器版，基於 iconv-lite
+// License: MIT
+// Copyright (c) 2011 Alexander Shtuchkin
+// license：https://github.com/ashtuchkin/iconv-lite/blob/master/LICENSE
+-->
+<script src="iconv-browser.js"></script>
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
+
+<style>
+*{
+box-sizing:border-box;
+}
+
+body {
+/*    font-family: "Segoe UI", "Microsoft JhengHei", Arial, sans-serif; */
+    margin: 0;
+    background-image: linear-gradient(155deg, rgba(237, 246, 255, 0.45), rgba(247, 249, 252, 0.25)), url("../bg-home.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: #333;
+    min-height: 100vh;           /* body 滿屏 */
+    display: flex;
+    flex-direction: column;
+}
+
+/*
+html {
+    font-size: 1.8rem;
+}
+*/
+
+/* ===== 容器 ===== */
+.container {
+    flex: 1;                     /* 推到中間，填滿剩餘空間 */
+    max-width: 1100px;
+    margin: 16px auto;           /* 手機小邊距 */
+    padding: 20px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+    width: 100%;
+}
+		
+
+/* ===== 標題列 ===== */
+.topbar {
+    display: flex;
+  	flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 2px;
+}
+
+
+.title {
+    margin: 2px;
+    font-size: 2.6rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0;
+    color: #2d3a4b;
+}
+
+.top-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* 按鈕靠右 */
+.button-right
+{
+    margin-left: auto;
+    display: flex;
+    gap: 4px;
+}
+
+
+#fontbutton button {
+    width: 40px;        /* 固定寬度 */
+    height: 40px;       /* 固定高度 */
+    font-size: 1.8rem;
+    display: inline-flex;
+	white-space: nowrap;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+/* ===== 文字框 ===== */
+textarea {
+    width: 100%;
+    min-height: 180px;           /* 最小高度保證可讀 */
+    height: 35vh;                /* 手機佔螢幕 35% 左右 */
+    max-height: 50vh;            /* 不要過高蓋住按鈕 */
+    font-size: 1.9rem;           /* ≥16px 避免 iOS 自動 zoom */
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #d7dce6;
+    background: #fafbff;
+    resize: vertical;
+    transition: all 0.2s;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #5b8cff;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(91,140,255,0.15);
+}
+
+textarea.dragover {
+    background: #eef4ff;
+    border-color: #6fa2ff;
+}
+
+/* ===== 按鈕區 ===== */
+.section {
+    margin: 2px 2px;
+    display: flex;
+    flex-wrap: wrap;             /* 核心：按鈕自動換行 */
+    align-items: center;
+}
+
+.section button,
+.section label {
+    flex: 1 1 auto;              /* 1 1 auto 可放大缩小 */
+    min-width: 140px;
+/*     white-space: nowrap;         按鈕文字不要換行 */
+}
+
+button {
+    padding: 12px 12px;
+    font-size: 1.8rem;
+    border-radius: 8px;
+    border: 1px solid #d0d7e2;
+    background: #f7f9fc;
+    cursor: pointer;
+    transition: all 0.15s;
+    min-height: 48px;            /* 觸控友好 */
+    touch-action: manipulation;
+}
+
+button:hover {
+    background: #eaf0ff;
+    border-color: #5b8cff;
+    color: #2f5be3;
+}
+
+button.primary {
+    background: #5b8cff;
+    border-color: #5b8cff;
+    color: white;
+}
+
+button.primary:hover {
+    background: #4b78e6;
+}
+
+/* 功能按鈕字體統一（轉換/版本/貼上/複製/修復/清空/交換） */
+#toggleConvertBtn,
+#convertButton,
+#pasteBtn,
+#copyOutputBtn,
+#fixGbkBtn,
+#fixBig5Btn,
+#clearInputBtn,
+#clearOutputBtn,
+#swapBtn {
+    font-size: 1.7rem;
+    font-weight: 400;
+    line-height: 1.2;
+}
+
+#toggleConvertBtn {
+    font-weight: bold;
+}
+
+
+/* 繁簡轉換按鈕 + 下拉選單 同一排優化 */
+.convert-row {
+    width: 64%;
+	flex-shrink: 0;       /* 防止被壓縮 */
+}
+
+
+.variant-wrapper {
+    display: flex;
+    flex-direction: row;
+    flex: 0 0 100%;
+    gap: 8px;            /* 兩個元素之間的間距 */
+    width: 100%;
+    align-items: center;
+}
+
+/* 按鈕佔比 */
+#toggleConvertBtn {
+    flex: 0 0 53%;   /* 固定 */
+}
+
+#convertWrapper {
+    flex: 1;         /* 吃剩下空間 */
+}
+
+/* 版本下拉選單 */
+#convertButton {
+    width: 100%;
+}
+
+/* 版本下拉選單內部 */
+#convertOption {
+    /* 移除 background: white; 這一行 */
+    padding: 6px 0;
+    border-radius: 12px;
+    border: 1px solid rgba(208, 215, 226, 0.8);
+    box-sizing: border-box;
+}
+
+/* 下拉選單內 option 的 hover 統一優化 */
+#convertOption option:hover {
+    background-color: rgba(91, 140, 255, 0.15);   /* 淡藍色，與面板同色系 */
+    color: inherit;
+}
+
+
+/* Hover 效果：按鈕對應文字框高亮 */
+#input.hover-highlight {
+    border-color: #5b8cff;
+    background: #f0f7ff;
+    box-shadow: 0 0 0 3px rgba(91, 140, 255, 0.25);
+}
+
+#output.hover-highlight {
+    border-color: #5b8cff;
+    background: #f0f7ff;
+    box-shadow: 0 0 0 3px rgba(91, 140, 255, 0.25);
+}
+
+textarea.flash-highlight {
+    animation: textareaFlash 0.3s ease;
+}
+
+@keyframes textareaFlash {
+    0% {
+        background-color: #fff4a8;
+    }
+    65% {
+        background-color: #fffbe2;
+    }
+}
+
+/* 深色模式適配 */
+body.dark #input.hover-highlight,
+body.dark #output.hover-highlight {
+    background: #2a3a5a;
+    border-color: #7ba3ff;
+    box-shadow: 0 0 0 3px rgba(123, 163, 255, 0.3);
+}
+
+body.transparent #input.hover-highlight,
+body.transparent #output.hover-highlight {
+    background: rgba(240, 247, 255, 0.35);
+}
+
+body.dark.transparent #input.hover-highlight,
+body.dark.transparent #output.hover-highlight {
+    background: rgba(42, 58, 90, 0.35);
+}
+
+body.dark textarea.flash-highlight {
+    animation-name: textareaFlashDark;
+}
+
+@keyframes textareaFlashDark {
+    0% {
+        background-color: #5a4b1f;
+    }
+    65% {
+        background-color: #3a3324;
+    }
+}
+
+
+/* checkbox 標籤 */
+label {
+    font-size: 1.8rem;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+input[type="checkbox"]{
+margin-right:5px;
+}
+
+
+/* Toast 通知樣式 */
+.toast-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.toast {
+    background: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1.6rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    pointer-events: none;
+    max-width: 90vw;
+    text-align: center;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast.success { background: #4caf50; }
+.toast.info    { background: #2196f3; }
+.toast.warning { background: #ff9800; }
+
+/* 深色模式支援 */
+body.dark .toast { background: rgba(255,255,255,0.9); color: #111; }
+
+
+/* ===== 深色模式 ===== */
+
+body.dark{
+background-image: linear-gradient(135deg, rgba(26, 29, 34, 0.88), rgba(26, 29, 34, 0.74)), url("../bg-404.jpg");
+background-size: cover;
+background-position: center;
+background-attachment: fixed;
+color:#e6e8eb;
+}
+
+body.dark .container{
+background:#23272f;
+box-shadow:0 10px 30px rgba(0,0,0,0.4);
+}
+
+body.dark textarea{
+background:#1f232a;
+border-color:#3a404a;
+color:#f1f1f1;
+}
+
+body.dark textarea:focus{
+border-color:#6fa2ff;
+box-shadow:0 0 0 3px rgba(111,162,255,0.2);
+}
+
+body.dark button{
+background:#2c313a;
+border-color:#444b57;
+color:#e3e3e3;
+}
+
+body.dark button:hover{
+background:#3a404c;
+border-color:#6fa2ff;
+color:#ffffff;
+}
+
+body.dark label{
+color:#cfd3d8;
+}
+
+body.dark .section b{
+color:#e3e5e8;
+}
+
+body.dark textarea.dragover{
+background:#2b3140;
+border-color:#6fa2ff;
+}
+
+body.dark button.primary{
+background:#4c6fb3;
+border-color:#4c6fb3;
+color:#ffffff;
+}
+
+body.dark button.primary:hover{
+background:#5b80c9;
+border-color:#5b80c9;
+}
+
+body.dark .title{
+color:#e9edf3;
+letter-spacing:0.3px;
+}
+
+
+body.dark .customize-panel,
+body.dark #convertOption {
+    background: rgba(35, 39, 47, 0.75);        /* 深色半透明 */
+    backdrop-filter: blur(1px);
+    color: #eee;
+    border-color: #555;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+}
+
+
+body.dark .checkbox-list label {
+    color: #e6e8eb;
+}
+
+body.dark .checkbox-list label:hover,
+body.dark #convertOption:hover {
+    background: rgba(123, 163, 255, 0.18);
+    border-color: #7ba3ff;
+}
+
+body.dark .panel-footer {
+    border-top-color: rgba(85, 85, 85, 0.8);
+}
+
+/* ===== 透明模式 ===== */
+body.transparent .container {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(1px);
+}
+
+body.dark.transparent .container {
+    background: rgba(35, 39, 47, 0.15) !important;
+    backdrop-filter: blur(1px);
+}
+
+body.transparent textarea {
+    background: rgba(250, 251, 255, 0.12);
+}
+
+body.dark.transparent textarea {
+    background: rgba(31, 35, 42, 0.12);
+}
+
+body.transparent button {
+    background: rgba(247, 249, 252, 0.18);
+}
+
+body.dark.transparent button {
+    background: rgba(44, 49, 58, 0.18);
+}
+
+body.transparent button.primary {
+    background: rgba(91, 140, 255, 0.85);
+}
+body.dark.transparent button.primary {
+    background: rgba(76, 111, 179, 0.85);
+}
+
+body.transparent button.primary:hover {
+    background: rgba(75, 120, 230, 0.85);
+}
+body.dark.transparent button.primary:hover {
+    background: rgba(91, 128, 201, 0.85);
+}
+
+body.transparent .select-options,
+body.transparent #customizePanel {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+body.dark.transparent .select-options,
+body.dark.transparent #customizePanel {
+    background: rgba(35, 39, 47, 0.18);
+}
+
+
+
+
+/* ===== 手機專屬優化（≤ 768px） ===== */
+@media (max-width: 768px) {
+    .container {
+        margin: 8px;
+        padding: 16px;
+        border-radius: 12px;
+    }
+
+
+    .top-controls {
+        width: 100%;
+        flex: 0 0 100%;   /* 強制換到下一行 */
+        flex-direction: row;
+        justify-content: space-between;   /* 填滿 */
+        gap: 6px;
+        min-width: 0;
+    }
+	/* === 強制三個控制項填滿可用空間 === 但無效 */
+    .top-controls > * {
+        flex: 1 1 auto;
+        min-width: 0;                /* 允許 flex 項目被壓縮到比內容還小 */
+    }
+	
+/* 如果想讓「自訂」和「語言」下拉稍微寬一點，背景按鈕固定一點，可以再微調 */
+    #customizeWrapper,
+    #langSelectWrapper {
+        flex: 1.2 1 auto;           /* 給下拉多一點空間 */
+    }
+
+    #themeToggle {
+        flex: 0.8 1 auto;           /* 背景按鈕稍微小一點 */
+        white-space: nowrap;
+    }
+
+
+.convert-row {
+    width: 100%;
+}
+
+
+    textarea {
+        height: 30vh;
+        min-height: 160px;
+        font-size: 1.5rem;
+        line-height: 1.5;
+    }
+
+    .section {
+        flex-direction: column;
+        gap: 2px;
+        margin: 2px 0;
+    }
+
+    /* 兩顆一排的組：強制等寬 + 填滿整行 */
+    .button-row {
+        display: flex;
+        flex-direction: row;
+        gap: 2px;
+        width: 100%;                /* 確保容器滿寬 */
+    }
+
+    .button-row > button {
+        flex: 1 1 0px;              /* 強制等寬，0px 比 0% 更可靠在某些瀏覽器 */
+        min-width: 0;
+        box-sizing: border-box;
+        width: 0;                   /* 配合 flex 讓它真正均分 */
+    }
+
+    /* 修復亂碼兩顆按鈕：點擊回饋改字時保持尺寸穩定 */
+    #fixGbkBtn,
+    #fixBig5Btn {
+        flex: 1 1 0;
+        width: 0;
+        min-width: 0;
+        height: 48px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.2;
+    }
+
+/* checkbox 組：強制同一行水平並排，不包裝成按鈕 */
+    .checkbox-row {
+        flex-direction: row;
+        width: 100%;
+        margin: 8px 0 0 0; /* 上 右 下 左 */
+        align-items: flex-start;
+    }
+
+/* 整組 */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+	justify-content: space-between;
+    width: 100%;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    flex: 1;
+    font-size: 1.7rem;
+    color: #555;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    accent-color: #5b8cff;
+}
+
+body.dark .checkbox-item {
+    color: #cfd3d8;
+}
+
+/* 文字處理（避免手機爆掉） */
+.checkbox-group span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.checkbox-list {
+    max-height: 340px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+
+
+    /* 最後三顆組：同一列 + 平均分布 */
+    .button-row.triple {
+        justify-content: space-between;  /* 關鍵：左右平均分布 */
+        gap: 10px;
+        width: 100%;
+    }
+
+    .button-row.triple > button {
+        flex: 1 1 30%;              /* 盡量三等分 */
+        min-width: 90px;            /* 避免過窄 */
+        white-space: nowrap;
+        font-size: 1.7rem;
+        padding: 12px 10px;
+        text-align: center;         /* 文字置中，看起來更平均 */
+    }
+
+    /* 所有按鈕基本樣式（手機） */
+    button {
+        padding: 6px 10px;
+        font-size: 1.7rem;
+        min-height: 48px;
+    }
+
+}
+
+
+/* ===== 平板與桌面（> 768px） ===== */
+@media (min-width: 769px) {
+    .container {
+        margin: 32px auto;
+        padding: 32px 40px;
+    }
+
+    textarea {
+        height: 320px;              /* 桌面固定高度 */
+        min-height: 280px;
+        margin-top: 8px;
+        margin-bottom: 8px;
+    }
+
+    .section {
+        gap: 8px;
+    }
+
+
+    .button-row {
+	    display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        box-sizing: border-box;
+        margin-left: 0;
+    }
+
+    .button-row:not(.fix-row):not(.action-row):not(.quick-row) {
+        width: 100%;
+    }
+
+    .convert-row {
+        flex: 0 0 calc((100% - 8px) * 0.55);
+        max-width: calc((100% - 8px) * 0.55);
+    }
+
+    .button-row.quick-row {
+        flex: 0 0 calc((100% - 8px) * 0.45);
+        max-width: calc((100% - 8px) * 0.45);
+        flex-wrap: nowrap;
+        margin: 0;
+    }
+
+    .button-row.fix-row,
+    .button-row.triple.action-row {
+        box-sizing: border-box;
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        margin: 0;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .button-row.fix-row {
+        flex: 0 0 calc((100% - 8px) * 0.38);
+        max-width: calc((100% - 8px) * 0.38);
+    }
+
+    .button-row.triple.action-row {
+        flex: 0 0 calc((100% - 8px) * 0.62);
+        max-width: calc((100% - 8px) * 0.62);
+        gap: 8px;
+    }
+
+    .button-row > * {
+        flex: 0 1 auto;             /* 不強制等寬 */
+    }
+
+    .button-row.fix-row > *,
+    .button-row.triple.action-row > * {
+        flex: 1 1 0;
+        min-width: 0;
+        box-sizing: border-box;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .button-row.triple.action-row > * {
+        white-space: nowrap;
+        padding: 10px 8px;
+    }
+
+    button {
+        padding: 10px 18px;
+    }
+
+    #toggleConvertBtn,
+    #convertButton,
+    #pasteBtn,
+    #copyOutputBtn,
+    #fixGbkBtn,
+    #fixBig5Btn,
+    #clearInputBtn,
+    #clearOutputBtn,
+    #swapBtn {
+        font-size: 1.8rem;
+    }
+}
+
+
+/* ==================== 統一自訂下拉與面板 ==================== */
+.custom-select {
+    position: relative;
+    display: block;
+}
+
+.select-button:hover {
+    background: rgba(91, 140, 255, 0.08);
+    border-color: #5b8cff;
+}
+
+.select-button .arrow {
+    display: inline-block;   /* 必加 */
+    margin-left: 8px;
+    font-size: 1.5rem;
+    transition: transform 0.1s ease;
+}
+
+.custom-select.open .select-button .arrow {
+    transform: rotate(180deg);
+}
+
+/* 選項列表 / 自訂面板共用 */
+.select-options {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    min-width: 150px;
+    background: rgba(255, 255, 255, 0.80);
+    border: 1px solid rgba(208, 215, 226, 0.8);
+    border-radius: 12px;
+    box-shadow: 0 10px 32px rgba(0,0,0,0.16);
+    margin-top: 6px;
+    z-index: 1000;
+    backdrop-filter: blur(1px);
+}
+
+.custom-select.open .select-options {
+    display: block;
+}
+
+/* 自訂顯示面板特殊處理（比一般下拉寬） */
+#customizePanel {
+    font-size: 1.8rem;
+    font-weight: bold;
+    min-width: 220px;
+    width: auto;
+    padding: 6px 10px;  /* 上下 6px，左右 10px */
+}
+
+.option {
+    font-size: 1.8rem;
+    padding: 6px 10px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+
+.option.selected {
+    background: rgba(91, 140, 255, 0.25);
+    font-weight: 500;
+}
+
+
+/* 選項 hover（統一藍色） */
+.option:hover,
+.checkbox-list label:hover {
+    background: rgba(91, 140, 255, 0.15);
+}
+
+/* 深色模式 */
+body.dark .select-button {
+    background: #2c313a;
+    border-color: #555;
+    color: #eee;
+}
+
+body.dark .select-options,
+body.dark #customizePanel {
+    background: rgba(35, 39, 47, 0.8);
+    border-color: rgba(85, 85, 85, 0.75);
+}
+
+body.dark .option {
+    color: #e6e8eb;
+}
+
+body.dark .option:hover,
+body.dark .checkbox-list label:hover {
+    background: rgba(123, 163, 255, 0.22);
+}
+
+.checkbox-list label {
+    padding: 4px 10px;        /* 上下 2px，左右 10px */
+    margin: 2px 0;            /* 選項之間增加一點外距控制（可微調） */
+    border-radius: 6px;
+}
+
+.section-toggle {
+    display: block; font-size: 1.8rem; font-weight: bold; padding: 8px 10px;
+    cursor: pointer; border-radius: 6px; user-select: none;
+    transition: background 0.15s; margin: 2px 0;
+}
+.section-toggle::before { content: "▶"; display: inline-block; transition: transform 0.1s; font-size: inherit; margin-right: 4px; }
+.section-toggle.open::before { transform: rotate(90deg); }
+
+.section-toggle button.small {
+    padding: 4px 10px;
+    font-size: 1.5rem;
+    min-height: auto;
+    border-radius: 4px;
+    line-height: 1.3;
+}
+.section-toggle:hover { background: rgba(91,140,255,0.12); }
+.section-toggle.open { }
+body.dark .section-toggle:hover { background: rgba(123,163,255,0.18); }
+body.dark .section-toggle.open { }
+
+.section-body { display: none; padding-left: 6px; }
+.section-body.open { display: block; }
+
+
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container wide">
+<div class="topbar">
+
+<div class="title" data-i18n="title">繁簡轉換工具</div>
+<!-- 字型大小 -->
+<div class="button-right" id="fontbutton">
+  <button class="select-button"  id="font-minus">&minus;</button>  
+  <button class="select-button"  id="font-reset" data-i18n="fontsize">字体</button>  
+  <button class="select-button"  id="font-plus">&plus;</button>
+</div>
+
+<div class="top-controls">
+
+    <!-- 自訂顯示設定選單 -->
+<div class="custom-select" id="customizeWrapper">
+        <button class="select-button" id="customizeBtn" data-i18n="customize">
+            ⚙️ 自訂
+        </button>
+        <div id="customizePanel" class="select-options customize-panel">
+              <span class="section-toggle" onclick="toggleSection(this)" style="display:flex;justify-content:space-between;align-items:center">
+                <span data-i18n="displaySettings">按鈕顯示</span>
+                <button id="resetDisplayBtn" class="small" data-i18n="reset" onclick="event.stopPropagation();resetDisplaySettings()">重設</button>
+              </span>
+            <div class="section-body">
+                <!-- 每個按鈕獨立設定 -->
+			<div class="checkbox-list">
+                <label>
+                    <input type="checkbox" id="showFontbutton" checked>
+                    <span data-i18n="showFontbutton">字體大小</span>
+                </label>
+
+                <label>
+                    <input type="checkbox" id="showToggleConvertBtn" checked>
+                    <span data-i18n="showToggleConvertBtn">繁簡轉換</span>
+                </label>
+
+                <label>
+                    <input type="checkbox" id="showLangSelectWrapper" checked>
+                    <span data-i18n="showLangSelectWrapper">語言選擇</span>
+                </label>
+                <label>
+                    <input type="checkbox" id="showConvertWrapper" checked>
+                    <span data-i18n="showConvertWrapper">繁體版本選擇</span>
+                </label>
+                
+                <label>
+                    <input type="checkbox" id="showPasteBtn" checked>
+                    <span data-i18n="showPasteBtn">剪貼簿貼到輸入</span>
+                </label>
+                
+                <label>
+                    <input type="checkbox" id="showCopyOutputBtn" checked>
+                    <span data-i18n="showCopyOutputBtn">複製輸出結果</span>
+                </label>
+                
+                <label>
+                    <input type="checkbox" id="showFixGbkBtn" checked>
+                    <span data-i18n="showFixGbkBtn">修復GBK亂碼</span>
+                </label>
+                
+                <label>
+                    <input type="checkbox" id="showFixBig5Btn" checked>
+                    <span data-i18n="showFixBig5Btn">修復BIG5亂碼</span>
+                </label>
+                
+                
+                <label>
+                    <input type="checkbox" id="showClearInputBtn">
+                    <span data-i18n="showClearInputBtn">清空輸入</span>
+                </label>
+                
+                <label>
+                    <input type="checkbox" id="showClearOutputBtn" checked>
+                    <span data-i18n="showClearOutputBtn">清空輸出</span>
+                </label>
+                
+                <label>
+                    <input type="checkbox" id="showSwapBtn" checked>
+                    <span data-i18n="showSwapBtn">交換內容</span>
+                </label>
+            </div>
+            </div>
+
+            <span class="section-toggle open" onclick="toggleSection(this)" style="display:flex;justify-content:space-between;align-items:center">
+                <span data-i18n="functionSettings">功能調整</span>
+                <button class="small" data-i18n="reset" onclick="event.stopPropagation();resetFunctionSettings()">重設</button>
+            </span>
+            <div class="section-body open">
+            <div class="checkbox-list">
+                <label>
+                    <input type="checkbox" id="pasteAppend">
+                    <span data-i18n="append">附加貼上</span>
+                </label>
+                <label>
+                    <input type="checkbox" id="pasteAppendNoNewline">
+                    <span data-i18n="appendNoNewline">附加貼上不換行</span>
+                </label>
+                <label>
+                    <input type="checkbox" id="appendOutput">
+                    <span data-i18n="appendOutput">附加輸出</span>
+                </label>
+                <label>
+                    <input type="checkbox" id="appendOutputNoNewline">
+                    <span data-i18n="appendOutputNoNewline">附加輸出不換行</span>
+                </label>
+                <label>
+                    <input type="checkbox" id="CustomFixMap">
+                    <span data-i18n="customFix">修復時套用自定義修復表</span>
+                </label>
+            </div>
+            </div>
+
+        </div>
+		</div>
+
+
+<!-- 語言選擇（自訂下拉） -->
+<div class="custom-select" id="langSelectWrapper">
+    <button class="select-button" id="langButton">
+        <span id="langText">UI介面</span>
+	    <span class="arrow">▼</span>
+    </button>
+    <div class="select-options" id="langOptions">
+        <div class="option" data-value="zh-TW" data-i18n-option="UIzhTW">繁體介面</div>
+        <div class="option" data-value="zh-CN" data-i18n-option="UIzhCN">简体介面</div>
+        <div class="option" data-value="en" data-i18n-option="UIen">English UI</div>
+    </div>
+</div>
+
+<button id="themeToggle" data-i18n="theme">背景</button>
+</div>
+</div>
+
+
+<textarea id="input" placeholder="貼上文字..." data-i18n-placeholder="input"></textarea>
+
+<div class="section">
+
+    <!-- 原本的按鈕們，全部加上獨立的 id -->
+    <div class="convert-row">
+        <div class="variant-wrapper">
+            <button id="toggleConvertBtn" 
+                    class="primary"
+                    onclick="toggleConvert()"
+                    data-i18n="t2s">
+                繁體 → 簡體
+            </button>
+
+<!-- 繁簡轉換模式（自訂下拉） -->
+<div class="custom-select" id="convertWrapper">
+    <button class="select-button" id="convertButton">
+        <span id="convertText">官版 (t)</span>
+    </button>
+    <div class="select-options" id="convertOption">
+        <div class="option" data-value="t" data-i18n-option="t">官版 (t)</div>
+        <div class="option" data-value="tw" data-i18n-option="tw">台版 (tw)</div>
+        <div class="option" data-value="hk" data-i18n-option="hk">港版 (hk)</div>
+        <div class="option" data-value="twp" data-i18n-option="twp">台版+詞語 (twp)</div>
+    </div>
+</div>
+        </div>
+    </div>
+
+    <!-- 複製相關 -->
+    <div class="button-row quick-row">
+        <button id="pasteBtn" 
+		    onmouseenter="highlightInput()" 
+            onmouseleave="unhighlightInput()"
+		onclick="pasteFromClipboard()" 
+		data-i18n="paste">剪貼簿貼到輸入</button>
+        <button id="copyOutputBtn" 
+            onmouseenter="highlightOutput()" 
+            onmouseleave="unhighlightOutput()"
+		onclick="copyOutputToClipboard()" 
+		data-i18n="copyOutput">複製輸出的結果</button>
+    </div>
+
+    <!-- 亂碼修復 -->
+    <div class="button-row fix-row">
+        <button id="fixGbkBtn" onclick="fixGbkDisplayedAsBig5()" data-i18n="fixGbk">修復GBK亂碼→簡體</button>
+        <button id="fixBig5Btn" onclick="fixBig5DisplayedAsGbk()" data-i18n="fixBig5">修復BIG5亂碼→繁體</button>
+    </div>
+
+    <!-- 清空與互換 -->
+    <div class="button-row triple action-row">
+        <button id="clearInputBtn" 
+		    onmouseenter="highlightInput()" 
+            onmouseleave="unhighlightInput()" 
+			onclick="clearInput()" 
+			data-i18n="clearInput">清空輸入</button>
+        <button id="clearOutputBtn" 
+            onmouseenter="highlightOutput()" 
+            onmouseleave="unhighlightOutput()"
+			onclick="clearOutput()" 
+			data-i18n="clearOutput">清空輸出</button>
+        <button id="swapBtn" onclick="swapInputOutput()" data-i18n="swap">↕交換內容</button>
+    </div>
+
+</div>
+<textarea id="output" placeholder="結果..." data-i18n-placeholder="output"></textarea>
+
+<script>
+
+function fixPUA(str){
+
+for(const k in puaFixMap){
+str = str.split(k).join(puaFixMap[k])
+}
+
+return str
+}
+
+// 修復表：PUA → 正確字（可自行擴充）
+const puaFixMap = {
+    "\uE000": "．",
+    "\uE001": "、",
+    "\uE002": "。",
+    "\uE003": "．",
+    "\uE004": "○",
+    "\uE005": "●",
+    "\uE006": "◎",
+    "\uE007": "☆",
+    "\uE008": "★",
+    "\uE009": "◇",
+    "\uE00A": "◆",
+    "\uE00B": "□",
+    "\uE00C": "■",
+    "\uE00D": "△",
+    "\uE00E": "▲",
+    "\uE00F": "▽",
+    "\uE010": "▼",
+    "\uE011": "※",
+    "\uE012": "→",
+    "\uE013": "←",
+    "\uE014": "↑",
+    "\uE015": "↓",
+    "\uE016": "↔",
+    "\uE017": "‧",
+    "\uE018": "—",
+    "\uE019": "–",
+    "\uE01A": "―",
+    "\uE01B": "…",
+    "\uE707": "器",
+    "\uF707": "器",
+    "\uE5D0": "龜",
+	"\uE5D1": "龜",
+    "\uE7C9": "臺",
+	"\uE7CA": "台",
+	"\uF761": "谴",
+    "\uF849": "蔣",
+    "\uF8A1": "，",
+    "\uF8A2": "。",
+    "\uF8A3": "、",
+    "\uF8A4": "；",
+    "\uF8A5": "：",
+    "\uF8A6": "？",
+    "\uF8A7": "！",
+    "\uF8A8": "⋯",
+    "\uF8A9": "……",
+    "\uF8AA": "—",
+    "\uF8AB": "–",
+    "\uF8AC": "―",
+    "\uF8AD": "…",
+    // 更多可從 HKSCS-2008 PUA mapping 補
+	// 來源是黑暗執行緒部落格 + PTT/巴哈姆特 等台灣社群常見補丁
+};
+
+// 檢查單一字元是否能安全用 Big5 編碼（round-trip 不變）
+function canEncodeInBig5(char) {
+    try {
+        const bytes = iconv.encode(char, "big5");
+        const back = iconv.decode(bytes, "big5");
+        return back === char;
+    } catch {
+        return false;
+    }
+}
+
+
+let OpenCCLib
+
+window.onload=()=>{
+OpenCCLib=window.OpenCC
+}
+
+// ==================== Toast 反饋系統 ====================
+function showToast(message, type = 'success', duration = 1300) {
+    // 建立容器（只建立一次）
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+
+    // 顯示
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+
+    // 自動消失
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, duration);
+}
+
+// ==================== 按鈕 Hover 高亮效果 ====================
+
+// 為輸入框添加高亮
+function highlightInput() {
+    const input = document.getElementById("input");
+    input.classList.add("hover-highlight");
+}
+
+// 移除輸入框高亮
+function unhighlightInput() {
+    const input = document.getElementById("input");
+    input.classList.remove("hover-highlight");
+}
+
+// 為輸出框添加高亮
+function highlightOutput() {
+    const output = document.getElementById("output");
+    output.classList.add("hover-highlight");
+}
+
+// 移除輸出框高亮
+function unhighlightOutput() {
+    const output = document.getElementById("output");
+    output.classList.remove("hover-highlight");
+}
+
+function flashTextarea(el) {
+    if (!el) return;
+    el.classList.remove("flash-highlight");
+    void el.offsetWidth;
+    el.classList.add("flash-highlight");
+}
+
+function writeOutputResult(resultText) {
+    const outputEl = document.getElementById("output");
+    const appendOutput = !!document.getElementById("appendOutput")?.checked;
+    const appendOutputNoNewline = !!document.getElementById("appendOutputNoNewline")?.checked;
+
+    if (!appendOutput) {
+        outputEl.value = resultText;
+        return;
+    }
+
+    if (appendOutputNoNewline) {
+        outputEl.value += resultText;
+    } else {
+        outputEl.value += (outputEl.value ? "\n" : "") + resultText;
+    }
+}
+
+
+
+// 全域變數
+// ==================== 繁簡轉換主功能 ====================
+let isT2S = true;
+let currentConvertMode = "t";     // 重要：與自訂下拉同步
+
+function toggleConvert() {
+    const input = document.getElementById("input").value;
+    if (!input.trim()) {
+        showToast(
+            i18n[localStorage.getItem("lang") || "zh-TW"]?.inputEmpty || "請輸入文字", 
+            "warning"
+        );
+        return;
+    }
+
+    const option = currentConvertMode;   // 使用自訂下拉的目前值
+
+    const btn = document.getElementById("toggleConvertBtn");
+    let from, to, i18nKey;
+
+    if (isT2S) {
+        // 繁體 → 簡體
+        from = (option === 'twp') ? 'twp' : 't';
+        to = 'cn';
+        i18nKey = "convertT2S";
+        if (btn) btn.dataset.i18n = "s2t";
+    } else {
+        // 簡體 → 繁體
+        from = 'cn';
+        switch(option) {
+            case 't':  to = 't';  break;
+            case 'tw': to = 'tw'; break;
+            case 'hk': to = 'hk'; break;
+            case 'twp':to = 'twp';break;
+            default:   to = 't';
+        }
+        i18nKey = "convertS2T";
+        if (btn) btn.dataset.i18n = "t2s";
+    }
+
+    try {
+        const converter = OpenCCLib.Converter({ from: from, to: to });
+        writeOutputResult(converter(input));
+
+        const lang = localStorage.getItem("lang") || "zh-TW";
+        const message = i18n[lang]?.[i18nKey] || (isT2S ? "已转为简体 ✓" : "已轉為繁體 ✓");
+        showToast(message, "success");
+    } catch (err) {
+        console.error("轉換錯誤:", err);
+        showToast("轉換失敗", "warning");
+    }
+
+    // 切換方向並更新按鈕文字
+    isT2S = !isT2S;
+    if (typeof updateI18n === "function") updateI18n();
+}
+
+
+// 繁體 → 簡體
+function convertT2S() {
+    const option = currentConvertMode;
+    const input = document.getElementById("input").value;
+    if (!input.trim()) return;
+
+    let from = 't';
+    if (option === 'twp') {
+        from = 'twp';   // 只有選詞語轉換時，才用 twp 轉簡體
+    }
+
+    const converter = OpenCCLib.Converter({ from: from, to: 'cn' });
+    writeOutputResult(converter(input));
+}
+
+// 簡體 → 繁體（現在包含純 t）
+function convertS2T() {
+    const option = currentConvertMode;
+    const input = document.getElementById("input").value;
+    if (!input.trim()) return;
+
+    let toVariant;
+
+    switch(option) {
+        case 't':
+            toVariant = 't';      // 傳統單字轉換
+            break;
+        case 'tw':
+            toVariant = 'tw';     // 台版單字
+            break;
+        case 'hk':
+            toVariant = 'hk';     // 港版單字
+            break;
+        case 'twp':
+            toVariant = 'twp';    // 台版詞語轉換
+            break;
+        default:
+            toVariant = 't';      // 預設用傳統 t
+    }
+
+    const converter = OpenCCLib.Converter({ from: 'cn', to: toVariant });
+    writeOutputResult(converter(input));
+}
+
+
+// GBK 被當 Big5 解讀顯示亂碼 → 修復成正確簡體
+function fixGbkDisplayedAsBig5() {
+    const input = document.getElementById("input").value;
+    const btn = event.target;           // 取得被點的按鈕
+    const originalText = btn.textContent;
+    if (!input.trim()) return;
+
+    const useCustomFix = document.getElementById("CustomFixMap").checked;
+
+    let output = '';
+
+    if (!useCustomFix) {
+        // 沒勾選 → 簡單直接轉
+        try {
+            const bytes = iconv.encode(input, "big5");
+            output = iconv.decode(bytes, "gbk");
+        } catch {
+            output = input; // 失敗就保留原樣
+        }
+    } else {
+        // 勾選 → 分段 + 逐段處理 + 套修復表
+        const segments = [];
+        let current = '';
+        let currentEncodable = true;
+
+        for (let i = 0; i < input.length; i++) {
+            const char = input[i];
+            const encodable = canEncodeInBig5(char);
+            if (encodable !== currentEncodable && current) {
+                segments.push({ text: current, encodable: currentEncodable });
+                current = '';
+            }
+            current += char;
+            currentEncodable = encodable;
+        }
+        if (current) {
+            segments.push({ text: current, encodable: currentEncodable });
+        }
+
+        for (const seg of segments) {
+            if (seg.encodable) {
+                try {
+                    const bytes = iconv.encode(seg.text, "big5");
+                    output += iconv.decode(bytes, "gbk");
+                } catch {
+                    output += seg.text;
+                }
+            } else {
+                // 不可編碼區段 → 套修復表
+                let fixed = '';
+                for (const char of seg.text) {
+                    fixed += puaFixMap[char] || char;
+                }
+                output += fixed;
+            }
+        }
+    }
+
+    writeOutputResult(output);
+    showFeedback(btn, t("fixok"), originalText);
+}
+
+
+// 亂碼修復 - Big5 被當成 GBK 解讀後顯示亂碼
+function fixBig5DisplayedAsGbk() {
+    const input = document.getElementById("input").value;
+    const btn = event.target;           // 取得被點的按鈕
+    const originalText = btn.textContent;
+    if (!input.trim()) return;
+
+    const useCustomFix = document.getElementById("CustomFixMap").checked;
+
+    let output = '';
+
+    if (!useCustomFix) {
+        // 沒勾選 → 簡單直接轉
+        try {
+            const bytes = iconv.encode(input, "gbk");
+            output = iconv.decode(bytes, "big5");
+        } catch {
+            output = input;
+        }
+    } else {
+        // 勾選 → 分段 + 逐段處理 + 套修復表
+        const segments = [];
+        let current = '';
+        let currentEncodable = true;
+
+        for (let i = 0; i < input.length; i++) {
+            const char = input[i];
+            const encodable = canEncodeInBig5(char);
+            if (encodable !== currentEncodable && current) {
+                segments.push({ text: current, encodable: currentEncodable });
+                current = '';
+            }
+            current += char;
+            currentEncodable = encodable;
+        }
+        if (current) {
+            segments.push({ text: current, encodable: currentEncodable });
+        }
+
+        for (const seg of segments) {
+            if (seg.encodable) {
+                try {
+                    const bytes = iconv.encode(seg.text, "gbk");
+                    output += iconv.decode(bytes, "big5");
+                } catch {
+                    output += seg.text;
+                }
+            } else {
+                // 不可編碼區段 → 套修復表
+                let fixed = '';
+                for (const char of seg.text) {
+                    fixed += puaFixMap[char] || char;
+                }
+                output += fixed;
+            }
+        }
+    }
+
+    writeOutputResult(output);
+    showFeedback(btn, t("fixok"), originalText);
+}
+
+
+/* 複製 */
+function copyOutputToClipboard() {
+    const outputEl = document.getElementById("output");
+    const text = outputEl.value.trim();
+    
+    if (!text) return;
+    
+    const btn = event.target;           // 取得被點的按鈕
+    const originalText = btn.textContent;
+    
+    navigator.clipboard.writeText(text).then(() => {
+	
+	flashTextarea(outputEl);
+	showFeedback(btn, t("clipboardCopy"), originalText);
+        
+    }).catch(() => {
+
+        showFeedback(btn, t("copyfail"), originalText);
+    });
+}
+
+
+// 清空輸入框
+function clearInput() {
+    const btn = event.target;           // 取得被點的按鈕
+    const originalText = btn.textContent;
+    document.getElementById("input").value = "";
+
+    flashTextarea(document.getElementById("input"));
+
+    showFeedback(btn, t("clearok"), originalText);
+}
+
+// 清空輸出框
+function clearOutput() {
+    const btn = event.target;           // 取得被點的按鈕
+    const originalText = btn.textContent;
+    document.getElementById("output").value = "";
+
+    flashTextarea(document.getElementById("output"));
+
+    showFeedback(btn, t("clearok"), originalText);
+}
+
+// 輸入與輸出內容互換
+function swapInputOutput() {
+    const inputEl  = document.getElementById("input");
+    const outputEl = document.getElementById("output");
+
+    const btn = event.target;           // 取得被點的按鈕
+    const originalText = btn.textContent;
+
+    const temp = inputEl.value;
+    inputEl.value  = outputEl.value;
+    outputEl.value = temp;
+
+    showFeedback(btn, t("swapok"), originalText);
+}
+
+// 從剪貼簿貼到輸入框（支援附加 / 覆蓋）
+function pasteFromClipboard() {
+    const inputEl = document.getElementById("input");
+    const appendMode = document.getElementById("pasteAppend").checked;
+    const appendNoNewline = document.getElementById("pasteAppendNoNewline").checked;
+    const btn = event.target;  // 用來做反饋
+    const originalText = btn.textContent;
+
+    // 先試舊的 execCommand 方式（觸發確認彈窗的機率較低）
+    const tempTextarea = document.createElement("textarea");
+    tempTextarea.style.position = "fixed";
+    tempTextarea.style.opacity = "0";
+    tempTextarea.style.left = "-9999px";
+    document.body.appendChild(tempTextarea);
+
+    tempTextarea.focus();
+    tempTextarea.select();
+
+    let pastedText = "";
+    let success = false;
+
+    try {
+        success = document.execCommand("paste");
+        if (success) {
+            pastedText = tempTextarea.value;
+        }
+    } catch (e) {
+        console.warn("execCommand paste 失敗:", e);
+    }
+
+    document.body.removeChild(tempTextarea);
+
+    if (success && pastedText.trim()) {
+        // 成功了，直接處理
+        applyPastedText(pastedText, inputEl, appendMode, appendNoNewline, btn, originalText);
+        return;
+    }
+
+    // 如果 execCommand 失敗 → fallback 到 Clipboard API
+    if (navigator.clipboard && navigator.clipboard.readText) {
+        navigator.clipboard.readText()
+            .then(text => {
+                if (text.trim()) {
+                    applyPastedText(text, inputEl, appendMode, appendNoNewline, btn, originalText);
+                } else {
+                    showFeedback(btn, t("clipboardEmpty"), originalText);
+                }
+            })
+            .catch(err => {
+                console.error("Clipboard API 失敗:", err);
+                showFeedback(btn, t("pasteFailed"), originalText);
+                alert(t("clipboardReadFail"));
+            });
+    } else {
+        showFeedback(btn, t("browserNotSupported"), originalText);
+        alert(t("clipboardNoSupport"));
+    }
+}
+
+// 處理貼上文字 + 反饋
+function applyPastedText(text, inputEl, appendMode, appendNoNewline, btn, originalText) {
+    if (appendMode) {
+        if (appendNoNewline) {
+            inputEl.value += text;
+        } else {
+            inputEl.value += (inputEl.value ? "\n" : "") + text;
+        }
+    } else {
+        inputEl.value = text;
+    }
+
+    inputEl.focus();
+    inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length);
+    flashTextarea(inputEl);
+
+    showFeedback(btn, t("clipboardPaste"), originalText);
+}
+
+function showFeedback(btn, msg, originalText) {
+    // 這兩顆修復按鈕改用 toast 回饋，避免文字變更造成尺寸抖動
+    if (btn && (btn.id === "fixGbkBtn" || btn.id === "fixBig5Btn")) {
+        showToast(msg, "success");
+        return;
+    }
+    btn.textContent = msg;
+    setTimeout(() => { btn.textContent = originalText; }, 900);
+}
+
+/* 深淺色模式切換 */
+
+const themeBtn=document.getElementById("themeToggle")
+
+function setTheme(mode){
+
+document.body.classList.remove("dark","transparent")
+
+if(mode==="dark"){
+document.body.classList.add("dark")
+}else if(mode==="light-transparent"){
+document.body.classList.add("transparent")
+}else if(mode==="dark-transparent"){
+document.body.classList.add("dark","transparent")
+}
+
+localStorage.setItem("theme",mode)
+
+const lang=localStorage.getItem("lang")||"zh-TW"
+const labels={
+"light":i18n[lang]?.theme?.light||"☀️ 背景",
+"light-transparent":i18n[lang]?.theme?.lightTransparent||"☀️ 透明",
+"dark":i18n[lang]?.theme?.dark||"🌙 背景",
+"dark-transparent":i18n[lang]?.theme?.darkTransparent||"🌙 透明"
+}
+updateI18n()
+
+if(themeBtn)themeBtn.textContent=labels[mode]||"背景"
+
+}
+
+themeBtn.onclick=()=>{
+const isDark=document.body.classList.contains("dark")
+const isTransparent=document.body.classList.contains("transparent")
+if(!isDark&&!isTransparent)setTheme("light-transparent")
+else if(!isDark&&isTransparent)setTheme("dark")
+else if(isDark&&!isTransparent)setTheme("dark-transparent")
+else setTheme("light")
+}
+
+
+/* 拖曳貼上（任何檔案都嘗試讀文字） */
+
+const inputBox = document.getElementById("input")
+
+inputBox.addEventListener("dragover",(e)=>{
+e.preventDefault()
+inputBox.classList.add("dragover")
+})
+
+inputBox.addEventListener("dragleave",()=>{
+inputBox.classList.remove("dragover")
+})
+
+inputBox.addEventListener("drop",(e)=>{
+e.preventDefault()
+inputBox.classList.remove("dragover")
+
+const append = document.getElementById("pasteAppend").checked
+const appendNoNewline = document.getElementById("pasteAppendNoNewline").checked
+
+/* 1. 如果有檔案 */
+
+if(e.dataTransfer.files && e.dataTransfer.files.length){
+
+const file = e.dataTransfer.files[0]
+const reader = new FileReader()
+
+reader.onload = function(ev){
+
+const text = ev.target.result
+
+if(append){
+if(appendNoNewline){
+inputBox.value += text
+}else{
+inputBox.value += (inputBox.value ? "\n" : "") + text
+}
+}else{
+inputBox.value = text
+}
+
+}
+
+reader.readAsText(file)
+
+return
+}
+
+/* 2. 如果是拖文字 */
+
+const text = e.dataTransfer.getData("text")
+
+if(text){
+
+if(append){
+if(appendNoNewline){
+inputBox.value += text
+}else{
+inputBox.value += (inputBox.value ? "\n" : "") + text
+}
+}else{
+inputBox.value = text
+}
+
+}
+
+})
+
+
+
+const i18n = {
+
+"zh-TW":{
+
+title:"繁簡轉換工具",
+fontsize:"字體",
+showFontbutton:"字體大小",
+
+UIzhTW:"繁體介面",
+UIzhCN:"簡體介面",
+UIen:"English UI",
+
+customize:"⚙️ 自訂",
+displaySettings:"按鈕顯示",
+functionSettings:"功能調整",
+showToggleConvertBtn:"繁簡轉換按鈕",
+showLangSelectWrapper:"UI語言選單",
+showConvertWrapper:"繁體版本選擇",
+showPasteBtn:"剪貼簿貼到輸入",
+showCopyOutputBtn:"複製輸出結果",
+showFixGbkBtn:"修復GBK亂碼",
+showFixBig5Btn:"修復BIG5亂碼",
+showPasteAppend:"附加貼上 勾選框",
+showPasteAppendNoNewline:"附加貼上不換行 勾選框",
+showAppendOutput:"附加輸出 勾選框",
+showAppendOutputNoNewline:"附加輸出不換行 勾選框",
+showCustomFixMap:"用修復表 勾選框",
+showClearInputBtn:"清空輸入",
+showClearOutputBtn:"清空輸出",
+showSwapBtn:"交換內容",
+reset:"重設",
+close:"關閉",
+
+convertT2S: "已轉為簡體 ✓",
+convertS2T: "已轉為繁體 ✓",
+inputEmpty: "輸入框無資料",
+
+input:"貼上文字...",
+output:"結果...",
+
+t2s:"繁/簡 → 簡體",
+s2t:"繁/簡 → 繁體",
+
+t: "官版繁體 (t)",
+tw: "台版繁體 (tw)",
+hk: "港版繁體 (hk)",
+twp: "台版繁體+詞語 (twp)",
+
+paste:"剪貼簿貼上",
+append:"附加貼上",
+appendNoNewline:"不換行",
+appendOutput:"附加輸出",
+appendOutputNoNewline:"不換行",
+
+clearInput:"清空輸入",
+swapok:"資料已互換",
+clearok:"已清空",
+fixok:"已嘗試修復",
+
+fixGbk:"修復GBK亂碼",
+fixBig5:"修復BIG5亂碼",
+
+customFix:"套用自定義修復表",
+
+copyOutput:"複製結果",
+swap:"↕交換內容",
+clearOutput:"清空輸出",
+
+theme:{
+light:"☀️ 背景",
+dark:"🌙 背景",
+lightTransparent:"☀️ 透明",
+darkTransparent:"🌙 透明",
+lightTransparent:"☀️ 透明",
+darkTransparent:"🌙 透明"
+},
+
+clipboardEmpty:"剪貼簿空的",
+pasteFailed:"貼上失敗",
+browserNotSupported:"瀏覽器不支援",
+
+clipboardReadFail:
+"無法自動讀取剪貼簿，請用 Ctrl+V 手動貼上。\n（瀏覽器安全限制，可能需點擊確認彈窗）",
+
+clipboardNoSupport:
+"你的瀏覽器不支援自動貼上，請用 Ctrl+V。",
+
+clipboardCopy:"已複製 ✓",
+copyfail: "複製失敗",
+
+clipboardPaste:"已貼上 ✓",
+fontResetOk:"已恢復預設大小 ✓"
+
+},
+
+"zh-CN":{
+
+title:"繁简转换工具",
+fontsize:"字体",
+showFontbutton:"字体大小",
+
+UIzhTW:"繁体介面",
+UIzhCN:"简体介面",
+UIen:"English UI",
+
+customize:"⚙️ 自订",
+displaySettings:"按钮显示",
+functionSettings:"功能调整",
+showToggleConvertBtn:"繁简转换按钮",
+showLangSelectWrapper:"UI语言选单",
+showConvertWrapper:"繁体版本选择",
+showPasteBtn:"剪贴板贴到输入",
+showCopyOutputBtn:"拷贝输出结果",
+showFixGbkBtn:"修复GBK乱码",
+showFixBig5Btn:"修复BIG5乱码",
+showPasteAppend:"附加粘贴 勾选框",
+showPasteAppendNoNewline:"追加粘贴不换行 勾选框",
+showAppendOutput:"追加输出 勾选框",
+showAppendOutputNoNewline:"追加输出不换行 勾选框",
+showCustomFixMap:"用修复表 勾选框",
+showClearInputBtn:"清空输入",
+showClearOutputBtn:"清空输出",
+showSwapBtn:"交换内容",
+reset:"重设",
+close:"关闭",
+
+convertT2S: "已转为简体 ✓",
+convertS2T: "已转为繁体 ✓",
+inputEmpty: "输入框无数据",
+
+input:"粘贴文字...",
+output:"结果...",
+
+t2s:"繁/简 → 简体",
+s2t:"繁/简 → 繁体",
+
+t: "官版繁体 (t)",
+tw: "台版繁体 (tw)",
+hk: "港版繁体 (hk)",
+twp: "台版繁体+词语 (twp)",
+
+paste:"剪贴版贴上",
+append:"追加粘贴",
+appendNoNewline:"不换行",
+appendOutput:"追加输出",
+appendOutputNoNewline:"不换行",
+
+clearInput:"清空输入",
+swapok:"数据已互换",
+clearok:"已清空",
+fixok:"已尝试修复",
+
+fixGbk:"修复GBK乱码",
+fixBig5:"修复BIG5乱码",
+
+customFix:"使用自定义修复表",
+
+copyOutput:"复制结果",
+swap:"↕交换内容",
+clearOutput:"清空输出",
+
+theme:{
+light:"☀️ 背景",
+dark:"🌙 背景",
+lightTransparent:"☀️ 透明",
+darkTransparent:"🌙 透明",
+lightTransparent:"☀️ 透明",
+darkTransparent:"🌙 透明"
+},
+
+clipboardEmpty:"剪贴板是空的",
+pasteFailed:"粘贴失败",
+browserNotSupported:"浏览器不支持",
+
+clipboardReadFail:
+"无法自动读取剪贴板，请用 Ctrl+V 手动粘贴。\n（浏览器安全限制，可能需要确认弹窗）",
+
+clipboardNoSupport:
+"你的浏览器不支持自动粘贴，请使用 Ctrl+V。",
+
+clipboardCopy:"已复制 ✓",
+copyfail: "复制失败",
+
+clipboardPaste:"已贴上 ✓",
+fontResetOk:"已恢复默认大小 ✓"
+
+},
+
+en:{
+
+title:"Chinese Converter",
+fontsize:"Font",
+showFontbutton:"Font Size",
+
+UIzhTW:"Traditional UI",
+UIzhCN:"Simplified UI",
+UIen:"English UI",
+
+customize:"⚙️ Customize",
+displaySettings:"Button Display",
+functionSettings:"Function",
+showToggleConvertBtn:"Convert",
+showLangSelectWrapper:"UI Language",
+showConvertWrapper:"Traditional Editon",
+showPasteBtn:"Paste",
+showCopyOutputBtn:"Copy",
+showFixGbkBtn:"Fix GBK Garbled",
+showFixBig5Btn:"Fix Big5 Garbled",
+showPasteAppend:"Append-Checkbox",
+showPasteAppendNoNewline:"Append-NoNewline-Checkbox",
+showAppendOutput:"Append-Output-Checkbox",
+showAppendOutputNoNewline:"Append-Output-NoNewline-Checkbox",
+showCustomFixMap:"Fix-table-Checkbox",
+showClearInputBtn:"ClearInput",
+showClearOutputBtn:"ClearOutput",
+showSwapBtn:"Swap",
+reset:"Reset",
+close:"Close",
+
+convertT2S: "Converted to Simplified ✓",
+convertS2T: "Converted to Traditional ✓",
+inputEmpty: "input EMPTY",
+
+input:"Paste text...",
+output:"Result...",
+
+t2s:"CN/TW → Simplified",
+s2t:"CN/TW → Traditional",
+
+t: "Traditional characters (t)",
+tw: "Taiwan characters (tw)",
+hk: "HongKong characters (hk)",
+twp: "Taiwan idiom conversion (twp)",
+
+paste:"Paste",
+append:"Append Paste",
+appendNoNewline:"without Newline",
+appendOutput:"Append Output",
+appendOutputNoNewline:"without Newline",
+
+clearInput:"Clear Input",
+swapok:"data swapped",
+clearok:"cleared",
+fixok:"fix attempted",
+
+fixGbk:"Fix GBK Garbled",
+fixBig5:"Fix BIG5 Garbled",
+
+customFix:"custom fix table",
+
+copyOutput:"Copy Output",
+swap:"↕ Swap",
+clearOutput:"Clear Output",
+
+theme:{
+light:"☀️ mode",
+dark:"🌙 mode",
+lightTransparent:"☀️ transparent",
+darkTransparent:"🌙 transparent"
+},
+
+clipboardEmpty:"Clipboard is empty",
+pasteFailed:"Paste failed",
+browserNotSupported:"Browser not supported",
+
+clipboardReadFail:
+"Unable to read clipboard automatically.\nPlease press Ctrl+V manually.",
+
+clipboardNoSupport:
+"Your browser does not support automatic paste.\nPlease use Ctrl+V.",
+
+clipboardCopy:"copied ✓",
+copyfail: "copy failed",
+
+clipboardPaste:"pasted ✓",
+fontResetOk:"Default size restored ✓"
+
+}
+
+}
+
+function toggleSection(el){ el.classList.toggle("open"); var b=el.nextElementSibling; if(b)b.classList.toggle("open") }
+// ==================== 原有功能 ====================
+function setLang(lang) {
+    localStorage.setItem("lang", lang);
+    updateI18n();
+}
+
+const langSelect = document.getElementById("langSelect");   // 保留原本的隱藏 select（如果還在使用的話）
+
+/* 頁面載入時恢復所有設定 */
+window.addEventListener("load", () => {
+    // 恢復語言設定
+    const savedLang = localStorage.getItem("lang") || "zh-TW";
+    if (langSelect) langSelect.value = savedLang;
+
+    // 新增：恢復繁體版本選擇
+    const savedConvertMode = localStorage.getItem("convertMode") || "t";
+    currentConvertMode = savedConvertMode;
+	
+    // 恢復主題設定
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+        document.body.classList.remove("dark","transparent");
+        if (savedTheme.includes("dark")) document.body.classList.add("dark");
+        if (savedTheme.includes("transparent")) document.body.classList.add("transparent");
+        const lang=localStorage.getItem("lang")||"zh-TW";
+        const labels={
+            "light":i18n[lang]?.theme?.light||"☀️ 背景",
+            "light-transparent":i18n[lang]?.theme?.lightTransparent||"☀️ 透明",
+            "dark":i18n[lang]?.theme?.dark||"🌙 背景",
+            "dark-transparent":i18n[lang]?.theme?.darkTransparent||"🌙 透明"
+        };
+        if (themeBtn) themeBtn.textContent = labels[savedTheme] || "背景";
+    }
+
+    // 更新介面文字（翻譯）
+    if (typeof updateI18n === "function") {
+        updateI18n();
+    }
+
+    // 恢復各按鈕的顯示/隱藏設定
+    if (typeof loadDisplaySettings === "function") {
+        loadDisplaySettings();
+    }
+
+    // 初始化自訂下拉與自訂顯示面板
+    initCustomControls();
+});
+
+// ==================== 多語言相關 ====================
+function updateI18n() {
+    const lang = localStorage.getItem("lang") || "zh-TW";
+    const mode = document.body.classList.contains("dark") ? "dark" : "light";
+
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.dataset.i18n;
+        let text = i18n[lang]?.[key];
+        if (typeof text === "object") {
+            text = text[mode];
+        }
+        if (text !== undefined) {
+            el.textContent = text;
+        }
+    });
+
+
+    // 翻譯 placeholder
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+        const key = el.dataset.i18nPlaceholder;
+        const text = i18n[lang]?.[key];
+        if (text !== undefined) {
+            el.placeholder = text;
+        }
+    });
+
+    // 特別處理單一轉換按鈕
+    const toggleBtn = document.getElementById("toggleConvertBtn");
+    if (toggleBtn) {
+        const key = toggleBtn.dataset.i18n;
+        const text = i18n[lang]?.[key];
+        if (text) toggleBtn.textContent = text;
+    }
+
+// === 自訂的語言選單 ====
+const langTextEl = document.getElementById("langText");
+if (langTextEl) {
+    const lang = localStorage.getItem("lang") || "zh-TW";
+    const map = {
+        "zh-TW": i18n[lang]?.UIzhTW,
+        "zh-CN": i18n[lang]?.UIzhCN,
+        "en": i18n[lang]?.UIen
+    };
+    langTextEl.textContent = map[lang] || lang;
+}
+
+// === 自訂的版本選單 ====
+const convertTextEl = document.getElementById("convertText");
+if (convertTextEl) {
+    const lang = localStorage.getItem("lang") || "zh-TW";
+    const map = {
+        t: i18n[lang]?.t,
+        tw: i18n[lang]?.tw,
+        hk: i18n[lang]?.hk,
+        twp: i18n[lang]?.twp
+    };
+    convertTextEl.textContent = map[currentConvertMode] || currentConvertMode;
+}
+
+// 處理下拉選單的 data-i18n-option
+    document.querySelectorAll("[data-i18n-option]").forEach(el => {
+        const key = el.dataset.i18nOption;
+        const text = i18n[lang]?.[key];
+        if (text !== undefined) {
+            el.textContent = text;
+        }
+    });
+
+}
+
+const missingI18n = new Set();
+function t(key) {
+    const lang = localStorage.getItem("lang") || "zh-TW";
+    const dict = i18n[lang] || {};
+    let text = dict[key];
+    if (text === undefined) {
+        const id = lang + ":" + key;
+        if (!missingI18n.has(id)) {
+            console.warn("⚠ missing i18n key:", key, "(lang:", lang, ")");
+            missingI18n.add(id);
+        }
+        return key;
+    }
+    if (typeof text === "object") {
+        const mode = document.body.classList.contains("dark") ? "dark" : "light";
+        text = text[mode];
+    }
+    return text;
+}
+
+// ==================== 自訂下拉選單 + 自訂顯示設定 ====================
+
+
+// 初始化所有自訂控制項
+function initCustomControls() {
+    const langWrapper = document.getElementById('langSelectWrapper');
+    const langButton = document.getElementById('langButton');
+    const langOptions = document.getElementById('langOptions');
+
+    const convertWrapper = document.getElementById('convertWrapper');
+    const convertButton = document.getElementById('convertButton');
+    const convertOption = document.getElementById('convertOption');
+
+    const customizeWrapper = document.getElementById('customizeWrapper');
+	const customizePanel = document.getElementById('customizePanel');
+    const customizeBtn = document.getElementById('customizeBtn');
+
+    // === 語言下拉 ===
+    if (langButton) {
+        langButton.addEventListener('click', (e) => {
+            e.stopImmediatePropagation();
+            langWrapper.classList.toggle('open');
+            if (convertWrapper) convertWrapper.classList.remove('open');
+            if (customizeWrapper) customizeWrapper.classList.remove('open');
+        });
+    }
+
+    langOptions?.querySelectorAll('.option').forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.stopImmediatePropagation();
+            currentLang = option.dataset.value;
+            localStorage.setItem("lang", currentLang);
+            if (typeof updateI18n === "function") updateI18n();
+            if (langWrapper) langWrapper.classList.remove('open');
+        });
+    });
+
+    // === 轉換模式下拉 ===
+    if (convertButton) {
+        convertButton.addEventListener('click', (e) => {
+            e.stopImmediatePropagation();
+            convertWrapper.classList.toggle('open');
+            if (langWrapper) langWrapper.classList.remove('open');
+            if (customizeWrapper) customizeWrapper.classList.remove('open');
+        });
+    }
+
+    convertOption?.querySelectorAll('.option').forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.stopImmediatePropagation();
+            currentConvertMode = option.dataset.value;
+			// 立刻儲存到 localStorage
+        localStorage.setItem("convertMode", currentConvertMode);
+            if (convertWrapper) convertWrapper.classList.remove('open');
+			// ==== 新增這一行 ====
+        if (typeof updateI18n === "function") updateI18n();
+		
+        });
+    });
+
+
+    // === 自訂顯示面板 ===
+    if (customizeBtn) {
+        customizeBtn.addEventListener('click', (e) => {
+            e.stopImmediatePropagation();
+            customizeWrapper.classList.toggle('open');
+            if (langWrapper) langWrapper.classList.remove('open');
+            if (convertWrapper) convertWrapper.classList.remove('open');
+        });
+    }
+
+
+
+
+// === 顯示設定功能 ===
+const displayElements = {
+    toggleConvertBtn: document.getElementById('toggleConvertBtn'),
+    pasteBtn: document.getElementById('pasteBtn'),
+    copyOutputBtn: document.getElementById('copyOutputBtn'),
+    fixGbkBtn: document.getElementById('fixGbkBtn'),
+    fixBig5Btn: document.getElementById('fixBig5Btn'),
+    
+    clearInputBtn: document.getElementById('clearInputBtn'),
+    clearOutputBtn: document.getElementById('clearOutputBtn'),
+    swapBtn: document.getElementById('swapBtn'),
+
+	langSelectWrapper: document.getElementById('langSelectWrapper'),
+    convertWrapper: document.getElementById('convertWrapper'),
+    fontbutton: document.getElementById('fontbutton'),
+
+};
+
+const displayCheckboxes = {
+    showToggleConvertBtn: document.getElementById('showToggleConvertBtn'),
+    showPasteBtn: document.getElementById('showPasteBtn'),
+    showCopyOutputBtn: document.getElementById('showCopyOutputBtn'),
+    showFixGbkBtn: document.getElementById('showFixGbkBtn'),
+    showFixBig5Btn: document.getElementById('showFixBig5Btn'),
+    showClearInputBtn: document.getElementById('showClearInputBtn'),
+    showClearOutputBtn: document.getElementById('showClearOutputBtn'),
+    showSwapBtn: document.getElementById('showSwapBtn'),
+
+	showLangSelectWrapper: document.getElementById('showLangSelectWrapper'),
+    showConvertWrapper: document.getElementById('showConvertWrapper'),
+    showFontbutton: document.getElementById('showFontbutton'),
+
+};
+
+
+    function saveDisplaySettings() {
+        const settings = {};
+        Object.keys(displayCheckboxes).forEach(key => {
+            if (displayCheckboxes[key]) {
+                settings[key] = displayCheckboxes[key].checked;
+            }
+        });
+        localStorage.setItem('buttonDisplaySettings', JSON.stringify(settings));
+    }
+
+    function loadDisplaySettings() {
+        const saved = localStorage.getItem('buttonDisplaySettings');
+        if (saved) {
+            const settings = JSON.parse(saved);
+            Object.keys(displayCheckboxes).forEach(key => {
+                if (displayCheckboxes[key]) {
+                    displayCheckboxes[key].checked = !!settings[key];
+                }
+            });
+        }
+        applyAllDisplaySettings();
+    }
+
+    function applyAllDisplaySettings() {
+        Object.keys(displayElements).forEach(key => {
+            const element = displayElements[key];
+            const checkboxKey = 'show' + key.charAt(0).toUpperCase() + key.slice(1);
+            const checkbox = displayCheckboxes[checkboxKey];
+
+        // ===== Debug 檢查 =====
+        if (!checkbox || !element) {
+            console.warn("⚠ 顯示控制異常:", {
+                key,
+                checkboxKey,
+                hasCheckbox: !!checkbox,
+                hasElement: !!element
+            });
+        }
+
+            if (element && checkbox) {
+                element.style.display = checkbox.checked ? '' : 'none';
+            }
+        });
+    }
+
+    // 監聽 checkbox 變化
+    Object.keys(displayCheckboxes).forEach(key => {
+        if (displayCheckboxes[key]) {
+            displayCheckboxes[key].addEventListener('change', () => {
+                applyAllDisplaySettings();
+                saveDisplaySettings();
+            });
+        }
+    });
+
+
+// 阻止「自訂顯示面板」內部點擊關閉
+customizePanel?.addEventListener('click', (e) => {
+    e.stopPropagation();
+});
+
+// 點外面關閉，不干擾點擊按鈕
+document.addEventListener('click', (e) => {
+    if (!customizeWrapper.contains(e.target)) {
+        customizeWrapper.classList.remove('open');
+    }
+});
+
+// 點擊外部關閉關語言和版本面板
+document.addEventListener('click', () => {
+    if (langWrapper) langWrapper.classList.remove('open');
+    if (convertWrapper) convertWrapper.classList.remove('open');
+});
+
+
+    window.resetDisplaySettings = function(){
+        Object.values(displayCheckboxes).forEach(cb=>{if(cb)cb.checked=true});
+        applyAllDisplaySettings();
+        saveDisplaySettings();
+    };
+    window.resetFunctionSettings = function(){
+        document.getElementById("pasteAppend").checked = false;
+        document.getElementById("pasteAppendNoNewline").checked = false;
+        document.getElementById("appendOutput").checked = false;
+        document.getElementById("appendOutputNoNewline").checked = false;
+        document.getElementById("CustomFixMap").checked = true;
+    };
+
+    // 初始化顯示文字與設定
+    loadDisplaySettings();
+}
+
+
+
+/* 缩放字体功能，将 FontSize 设为 62.5% ， 1rem=10px为原版大小 */
+document.addEventListener('DOMContentLoaded', function() {
+  let currentScale = 62.5;   // 預設值
+  const html = document.documentElement;
+  const STORAGE_KEY = 'customFontScale';   // 用來儲存的 key
+
+  // 從 localStorage 讀取上次設定的值
+  function loadSavedScale() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      currentScale = parseInt(saved);
+    }
+  }
+
+  // 更新字型並儲存
+  function updateFontSize(save = true) {
+    html.style.fontSize = currentScale + '%';
+    
+    if (save) {
+      localStorage.setItem(STORAGE_KEY, currentScale);
+    }
+  }
+
+  // 綁定按鈕
+  const btnMinus = document.getElementById('font-minus');
+  const btnPlus  = document.getElementById('font-plus');
+  const btnReset = document.getElementById('font-reset');
+
+  if (btnMinus) {
+    btnMinus.addEventListener('click', () => {
+      currentScale = Math.max(37.5, currentScale - 5);
+      updateFontSize();
+    });
+  }
+
+  if (btnPlus) {
+    btnPlus.addEventListener('click', () => {
+      currentScale = Math.min(112.5, currentScale + 5);
+      updateFontSize();
+    });
+  }
+
+  if (btnReset) {
+    btnReset.addEventListener('click', () => {
+      currentScale = 62.5;
+      updateFontSize();
+      showToast(t("fontResetOk"), "success");
+    });
+  }
+
+  // 載入並套用上次儲存的值
+  loadSavedScale();
+  updateFontSize(false);   // 第一次載入不重複儲存
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  const pasteAppend = document.getElementById('pasteAppend');
+  const pasteAppendNoNewline = document.getElementById('pasteAppendNoNewline');
+  const appendOutput = document.getElementById('appendOutput');
+  const appendOutputNoNewline = document.getElementById('appendOutputNoNewline');
+
+  if (pasteAppend && pasteAppendNoNewline) {
+    if (pasteAppendNoNewline.checked) {
+      pasteAppend.checked = true;
+    }
+    pasteAppend.addEventListener('change', () => {
+      if (!pasteAppend.checked) {
+        pasteAppendNoNewline.checked = false;
+      }
+    });
+    pasteAppendNoNewline.addEventListener('change', () => {
+      if (pasteAppendNoNewline.checked) {
+        pasteAppend.checked = true;
+      }
+    });
+  }
+
+  if (appendOutput && appendOutputNoNewline) {
+    if (appendOutputNoNewline.checked) {
+      appendOutput.checked = true;
+    }
+    appendOutput.addEventListener('change', () => {
+      if (!appendOutput.checked) {
+        appendOutputNoNewline.checked = false;
+      }
+    });
+    appendOutputNoNewline.addEventListener('change', () => {
+      if (appendOutputNoNewline.checked) {
+        appendOutput.checked = true;
+      }
+    });
+  }
+});
+
+</script>
+<!--
+繁簡轉換器.html
+https://github.com/artting-creator/tools/tree/main/Browser
+License: MIT
+Copyright (c) 2026 artting
+-->
+</div>
+</body>
+</html>
