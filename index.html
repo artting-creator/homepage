@@ -14,8 +14,34 @@
      <div class="signboard-body">
        <h1>Artting 小工具站</h1>
      </div>
+    </div>
+ 
+   <!-- Other Files Button -->
+   <div class="folder-btn" id="folderBtn">
+     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+       <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+     </svg>
+     <span data-i18n="other-files">其它檔案</span>
    </div>
-  <div class="top-bar">
+ 
+   <!-- File Panel -->
+   <div class="file-panel" id="filePanel">
+     <div class="file-panel-header">
+       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+       </svg>
+       <span data-i18n="other-files">其它檔案</span>
+       <button class="file-panel-close" id="filePanelClose">&times;</button>
+     </div>
+     <div class="file-panel-body">
+       <div class="file-list" id="fileList"></div>
+       <div class="file-desc-area" id="fileDescArea">
+         <div class="file-desc-placeholder" data-i18n="select-file">請點選檔案查看說明</div>
+         <div class="file-desc-content" id="fileDescContent"></div>
+       </div>
+     </div>
+   </div>
+   <div class="top-bar">
      <div class="custom-select" id="langSelectWrapper">
        <button class="select-button" id="langButton">
          <span id="langText">中文</span>
@@ -129,7 +155,49 @@
      });
      document.addEventListener("click",function(){
        langSelectWrapper.classList.remove("open");
-     });
+      });
+    // ===== File Explorer =====
+    const filesData = [
+      { name: "autollama.bat", desc: "llama.cpp 啟動器腳本，支援多模型選擇、API 金鑰配置與 Jinja 模板，可一鍵啟動 LLM 推論伺服器。", path: "./files/autollama.bat" },
+      { name: "start-chrome-debug-9222.bat", desc: "以遠端除錯模式啟動 Chrome 瀏覽器，連接埠 9222，供自動化工具或爬蟲程式連接操控。", path: "./files/start-chrome-debug-9222.bat" },
+      { name: "Start-SillyTavern.bat", desc: "SillyTavern 角色扮演聊天前端啟動腳本，自動檢查相依性並以生產模式執行。", path: "./files/Start-SillyTavern.bat" },
+      { name: "UpdateComfyUI.bat", desc: "ComfyUI 一鍵更新工具，自動拉取最新版本並更新依賴套件，保持繪圖工作流程順暢。", path: "./files/UpdateComfyUI.bat" },
+      { name: "酒館助手參考文件-types-手機或AI官網用.txt", desc: "SillyTavern 酒館助手 TypeScript 型別定義參考文件，包含 Audio、Chat、Plugin 等完整型別，可於手機端或 AI 官網查閱。", path: "./files/酒館助手參考文件-types-手機或AI官網用.txt" }
+    ];
+    i18n["zh-TW"]["other-files"]="其它檔案";i18n["zh-TW"]["select-file"]="請點選檔案查看說明";
+    i18n["zh-CN"]["other-files"]="其它文件";i18n["zh-CN"]["select-file"]="请点击文件查看说明";
+    i18n["en"]["other-files"]="Other Files";i18n["en"]["select-file"]="Click a file to see description";
+    Array.from(document.querySelectorAll("[data-i18n]")).forEach(function(el){
+      const key=el.dataset.i18n;
+      if(i18n[curLang][key])el.textContent=i18n[curLang][key];
+    });
+    (function(){
+      const folderBtn=document.getElementById("folderBtn");
+      const filePanel=document.getElementById("filePanel");
+      const closeBtn=document.getElementById("filePanelClose");
+      const fileListEl=document.getElementById("fileList");
+      const descContent=document.getElementById("fileDescContent");
+      const descArea=document.getElementById("fileDescArea");
+      folderBtn.addEventListener("click",function(e){e.stopPropagation();filePanel.classList.toggle("open");});
+      closeBtn.addEventListener("click",function(){filePanel.classList.remove("open");});
+      filesData.forEach(function(file){
+        const item=document.createElement("div");item.className="file-item";
+        const nameSpan=document.createElement("span");nameSpan.className="file-name";
+        nameSpan.textContent=file.name;
+        nameSpan.addEventListener("click",function(){
+          descContent.textContent=file.desc;descArea.classList.add("has-content");
+          document.querySelectorAll(".file-item").forEach(function(el){el.classList.remove("selected");});
+          item.classList.add("selected");
+        });
+        const dlBtn=document.createElement("a");dlBtn.className="file-download";
+        dlBtn.href=file.path;dlBtn.download=file.name;
+        dlBtn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+        item.appendChild(nameSpan);item.appendChild(dlBtn);fileListEl.appendChild(item);
+      });
+      document.addEventListener("click",function(e){
+        if(filePanel.classList.contains("open")&&!filePanel.contains(e.target)&&!folderBtn.contains(e.target))filePanel.classList.remove("open");
+      });
+    })();
    })();
  </script>
   </body>
