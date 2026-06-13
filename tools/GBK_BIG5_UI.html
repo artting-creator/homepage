@@ -511,6 +511,7 @@ body.dark.transparent #customizePanel {
     .container {
         margin: 8px;
         padding: 16px;
+        width: auto;
         border-radius: 12px;
     }
 
@@ -2080,6 +2081,12 @@ window.addEventListener("load", () => {
         loadDisplaySettings();
     }
 
+    // 恢復功能設定
+    if (typeof loadFunctionSettings === "function") {
+        loadFunctionSettings();
+    }
+
+
     // 初始化自訂下拉與自訂顯示面板
     initCustomControls();
 });
@@ -2369,10 +2376,44 @@ document.addEventListener('click', () => {
         document.getElementById("appendOutput").checked = false;
         document.getElementById("appendOutputNoNewline").checked = false;
         document.getElementById("CustomFixMap").checked = true;
+        saveFunctionSettings();
     };
+
+    function saveFunctionSettings() {
+        const settings = {};
+        ["pasteAppend","pasteAppendNoNewline","appendOutput","appendOutputNoNewline","CustomFixMap"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) settings[id] = el.checked;
+        });
+        localStorage.setItem('buttonFunctionSettings', JSON.stringify(settings));
+    }
+
+    function loadFunctionSettings() {
+        const saved = localStorage.getItem('buttonFunctionSettings');
+        if (saved) {
+            const settings = JSON.parse(saved);
+            ["pasteAppend","pasteAppendNoNewline","appendOutput","appendOutputNoNewline","CustomFixMap"].forEach(id => {
+                const el = document.getElementById(id);
+                if (el && settings[id] !== undefined) el.checked = !!settings[id];
+            });
+            // 確保相依性一致（子選項被勾選時，父選項也勾選）
+            const pan = document.getElementById('pasteAppendNoNewline');
+            const pa = document.getElementById('pasteAppend');
+            if (pan && pan.checked && pa) pa.checked = true;
+            const aon = document.getElementById('appendOutputNoNewline');
+            const ao = document.getElementById('appendOutput');
+            if (aon && aon.checked && ao) ao.checked = true;
+        }
+        // 監聽變化並儲存
+        ["pasteAppend","pasteAppendNoNewline","appendOutput","appendOutputNoNewline","CustomFixMap"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('change', saveFunctionSettings);
+        });
+    }
 
     // 初始化顯示文字與設定
     loadDisplaySettings();
+    loadFunctionSettings();
 }
 
 
