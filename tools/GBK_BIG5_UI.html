@@ -106,6 +106,33 @@ html {
     justify-content: center;
     padding: 0;
 }
+/* 首頁按鈕 */
+#homeBtn {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #2d3a4b;
+    border-radius: 8px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+#homeBtn:hover {
+    background: rgba(91, 140, 255, 0.12);
+    color: #5b8cff;
+}
+body.dark #homeBtn {
+    color: #e9edf3;
+}
+body.dark #homeBtn:hover {
+    background: rgba(123, 163, 255, 0.18);
+    color: #7ba3ff;
+}
 
 /* ===== 文字框 ===== */
 textarea {
@@ -903,6 +930,7 @@ body.dark .section-toggle.open { }
 
 <div class="container wide">
 <div class="topbar">
+<button id="homeBtn" onclick="goHome()" title="Home" aria-label="Home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></button>
 
 <div class="title" data-i18n="title">繁簡轉換工具</div>
 <!-- 字型大小 -->
@@ -1006,9 +1034,13 @@ body.dark .section-toggle.open { }
                     <input type="checkbox" id="appendOutputNoNewline">
                     <span data-i18n="appendOutputNoNewline">附加輸出不換行</span>
                 </label>
+               <label>
+                   <input type="checkbox" id="CustomFixMap">
+                   <span data-i18n="customFix">修復時套用自定義修復表</span>
+               </label>
                 <label>
-                    <input type="checkbox" id="CustomFixMap">
-                    <span data-i18n="customFix">修復時套用自定義修復表</span>
+                    <input type="checkbox" id="flashHighlight" checked>
+                    <span data-i18n="showFlashHighlight">按鈕點擊閃爍</span>
                 </label>
             </div>
             </div>
@@ -1244,6 +1276,8 @@ function unhighlightOutput() {
 
 function flashTextarea(el) {
     if (!el) return;
+    const flashCb = document.getElementById("flashHighlight");
+    if (flashCb && !flashCb.checked) return;
     el.classList.remove("flash-highlight");
     void el.offsetWidth;
     el.classList.add("flash-highlight");
@@ -1311,6 +1345,7 @@ function toggleConvert() {
     try {
         const converter = OpenCCLib.Converter({ from: from, to: to });
         writeOutputResult(converter(input));
+        flashTextarea(document.getElementById("output"));
 
         const lang = localStorage.getItem("lang") || "zh-TW";
         const message = i18n[lang]?.[i18nKey] || (isT2S ? "已转为简体 ✓" : "已轉為繁體 ✓");
@@ -1430,6 +1465,7 @@ function fixGbkDisplayedAsBig5() {
     }
 
     writeOutputResult(output);
+    flashTextarea(document.getElementById("output"));
     showFeedback(btn, t("fixok"), originalText);
 }
 
@@ -1493,6 +1529,7 @@ function fixBig5DisplayedAsGbk() {
     }
 
     writeOutputResult(output);
+    flashTextarea(document.getElementById("output"));
     showFeedback(btn, t("fixok"), originalText);
 }
 
@@ -1554,6 +1591,10 @@ function swapInputOutput() {
     outputEl.value = temp;
 
     showFeedback(btn, t("swapok"), originalText);
+}
+// 首頁按鈕：嘗試關閉視窗，若失敗則跳上一層 index.html
+function goHome() {
+    window.location.href = '../index.html';
 }
 
 // 從剪貼簿貼到輸入框（支援附加 / 覆蓋）
@@ -1782,6 +1823,7 @@ showPasteAppendNoNewline:"附加貼上不換行 勾選框",
 showAppendOutput:"附加輸出 勾選框",
 showAppendOutputNoNewline:"附加輸出不換行 勾選框",
 showCustomFixMap:"用修復表 勾選框",
+showFlashHighlight:"按鈕點擊閃爍",
 showClearInputBtn:"清空輸入",
 showClearOutputBtn:"清空輸出",
 showSwapBtn:"交換內容",
@@ -1875,6 +1917,7 @@ showPasteAppendNoNewline:"追加粘贴不换行 勾选框",
 showAppendOutput:"追加输出 勾选框",
 showAppendOutputNoNewline:"追加输出不换行 勾选框",
 showCustomFixMap:"用修复表 勾选框",
+showFlashHighlight:"按钮点击闪烁",
 showClearInputBtn:"清空输入",
 showClearOutputBtn:"清空输出",
 showSwapBtn:"交换内容",
@@ -1968,6 +2011,7 @@ showPasteAppendNoNewline:"Append-NoNewline-Checkbox",
 showAppendOutput:"Append-Output-Checkbox",
 showAppendOutputNoNewline:"Append-Output-NoNewline-Checkbox",
 showCustomFixMap:"Fix-table-Checkbox",
+showFlashHighlight:"Button Click Flash",
 showClearInputBtn:"ClearInput",
 showClearOutputBtn:"ClearOutput",
 showSwapBtn:"Swap",
@@ -2376,12 +2420,13 @@ document.addEventListener('click', () => {
         document.getElementById("appendOutput").checked = false;
         document.getElementById("appendOutputNoNewline").checked = false;
         document.getElementById("CustomFixMap").checked = true;
+        document.getElementById("flashHighlight").checked = true;
         saveFunctionSettings();
     };
 
     function saveFunctionSettings() {
         const settings = {};
-        ["pasteAppend","pasteAppendNoNewline","appendOutput","appendOutputNoNewline","CustomFixMap"].forEach(id => {
+        ["pasteAppend","pasteAppendNoNewline","appendOutput","appendOutputNoNewline","CustomFixMap","flashHighlight"].forEach(id => {
             const el = document.getElementById(id);
             if (el) settings[id] = el.checked;
         });
@@ -2392,7 +2437,7 @@ document.addEventListener('click', () => {
         const saved = localStorage.getItem('buttonFunctionSettings');
         if (saved) {
             const settings = JSON.parse(saved);
-            ["pasteAppend","pasteAppendNoNewline","appendOutput","appendOutputNoNewline","CustomFixMap"].forEach(id => {
+            ["pasteAppend","pasteAppendNoNewline","appendOutput","appendOutputNoNewline","CustomFixMap","flashHighlight"].forEach(id => {
                 const el = document.getElementById(id);
                 if (el && settings[id] !== undefined) el.checked = !!settings[id];
             });
@@ -2405,7 +2450,7 @@ document.addEventListener('click', () => {
             if (aon && aon.checked && ao) ao.checked = true;
         }
         // 監聽變化並儲存
-        ["pasteAppend","pasteAppendNoNewline","appendOutput","appendOutputNoNewline","CustomFixMap"].forEach(id => {
+        ["pasteAppend","pasteAppendNoNewline","appendOutput","appendOutputNoNewline","CustomFixMap","flashHighlight"].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', saveFunctionSettings);
         });

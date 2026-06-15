@@ -56,29 +56,43 @@
     <button id="themeToggle" class="theme-btn">☀️ 淺色</button>
    </div>
  
-   <!-- Center action buttons -->
-   <div class="btn-group">
-     <a class="tool-btn tool-accent" href="./tools/GBK_BIG5_UI.html" target="_blank" rel="noopener noreferrer">
-       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-         <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-       </svg>
-        <span class="btn-label" data-i18n="converter">繁簡轉換器</span>
-     </a>
+  <!-- Converter (left) -->
+  <div class="converter-side">
+    <a href="./tools/GBK_BIG5_UI.html" target="_blank" rel="opener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+      </svg>
+      <span data-i18n="converter">繁簡轉換器</span>
+    </a>
+  </div>
  
-       <a class="tool-btn forum-accent" href="./MessageBoard/mainBoard.html" target="_blank" rel="noopener noreferrer">
-       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-       </svg>
+  <!-- Center action buttons -->
+  <div class="btn-group">
+
+      <a class="tool-btn forum-accent" href="./MessageBoard/mainBoard.html" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
         <span class="btn-label" data-i18n="board">留言板</span>
      </a>
-   </div>
+
+      <a class="tool-btn test-accent" href="./not_found.html" target="_blank" rel="opener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <span class="btn-label" data-i18n="test-area">測試區</span>
+     </a>
+  </div>
  <script>
    (function(){
      const i18n={
        "zh-TW":{
          "converter":"繁簡轉換器",
-         "board":"留言板",
-         "t-light":"☀️ 淺色",
+        "board":"留言板",
+        "test-area":"測試區",
+        "t-light":"☀️ 淺色",
          "t-trans":"☀️ 透明",
          "t-dark":"🌙 深色",
          "t-dark-trans":"🌙 透明",
@@ -86,8 +100,9 @@
        },
        "zh-CN":{
          "converter":"繁简转换器",
-         "board":"留言板",
-         "t-light":"☀️ 浅色",
+        "board":"留言板",
+        "test-area":"测试区",
+        "t-light":"☀️ 浅色",
          "t-trans":"☀️ 透明",
          "t-dark":"🌙 深色",
          "t-dark-trans":"🌙 透明",
@@ -95,8 +110,9 @@
        },
        "en":{
          "converter":"Converter",
-         "board":"Message Board",
-         "t-light":"☀️ Light",
+        "board":"Message Board",
+        "test-area":"Test Area",
+        "t-light":"☀️ Light",
          "t-trans":"☀️ Transparent",
          "t-dark":"🌙 Dark",
          "t-dark-trans":"🌙 Transparent",
@@ -160,7 +176,7 @@
     const filesData = [
       { name: "autollama.bat", desc: "llama.cpp 啟動器腳本，支援多模型選擇、API 金鑰配置與 Jinja 模板，可一鍵啟動 LLM 推論伺服器。", path: "./files/autollama.bat" },
       { name: "start-chrome-debug-9222.bat", desc: "以遠端除錯模式啟動 Chrome 瀏覽器，連接埠 9222，供自動化工具或爬蟲程式連接操控。", path: "./files/start-chrome-debug-9222.bat" },
-      { name: "Start-SillyTavern.bat", desc: "SillyTavern 角色扮演聊天前端啟動腳本，自動檢查相依性並以生產模式執行。", path: "./files/Start-SillyTavern.bat" },
+      { name: "Start-SillyTavern.bat", desc: "SillyTavern 酒館的前端啟動腳本，在酒館安裝目錄下執行。簡易防呆，不更新版本，有缺node_modules目錄才用最精簡的參數安裝依賴，接著以正式產品模式執行（效能最佳化）。", path: "./files/Start-SillyTavern.bat" },
       { name: "UpdateComfyUI.bat", desc: "ComfyUI 一鍵更新工具，自動拉取最新版本並更新依賴套件，保持繪圖工作流程順暢。", path: "./files/UpdateComfyUI.bat" },
       { name: "酒館助手參考文件-types-手機或AI官網用.txt", desc: "SillyTavern 酒館助手 TypeScript 型別定義參考文件，包含 Audio、Chat、Plugin 等完整型別，可於手機端或 AI 官網查閱。", path: "./files/酒館助手參考文件-types-手機或AI官網用.txt" }
     ];

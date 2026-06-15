@@ -29,9 +29,25 @@
     <h1 class="nf-title">找不到這個頁面</h1>
     <p class="nf-text">你要找的內容可能已搬移、改名，或目前不存在。</p>
     <div class="nf-actions">
-      <a class="nf-btn" href="./">回到首頁</a>
-      <a class="nf-btn ghost" href="javascript:history.back()">返回上一頁</a>
+      <a class="nf-btn" href="./index.html">回到首頁</a>
+      <a class="nf-btn ghost" onclick="returnToPrevious(); return false;">關閉並返回</a>
     </div>
   </main>
+
+<script>
+function returnToPrevious() {
+    if (window.opener && !window.opener.closed) {
+        // 情況1：由其他頁面開啟 → 關閉自己
+        window.close();
+    } else if (document.referrer) {
+        // 情況2：有來源頁面（例如普通超連結點過來）→ 回上一頁
+        history.back();
+    } else {
+        // 情況3：直接輸入網址或書籤開啟 → 給提示
+        alert('無法自動返回，請手動關閉此分頁。');
+    }
+}
+</script>
+
 </body>
 </html>

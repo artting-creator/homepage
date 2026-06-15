@@ -241,8 +241,8 @@
     <!-- 引入 Supabase SDK - 使用正確的方式 -->
     <script type="module">
         // ⚠️ 請在這裡貼上你的 Supabase URL 和 anon key
-        const SUPABASE_URL = 'https://ivhipzricpbiufcbquvc.supabase.co';  // 例如: https://xxxxx.supabase.co
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2aGlwenJpY3BiaXVmY2JxdXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTgwNzAsImV4cCI6MjA5NjEzNDA3MH0.ApNWoASUkODft8UpetMCALx9baRRfT0-oSce1DVbdd0';  // 例如: eyJhbGciOiJIUzI1NiIs...
+        const SUPABASE_URL = 'https://ivhipzricpbiufcbquvc.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2aGlwenJpY3BiaXVmY2JxdXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTgwNzAsImV4cCI6MjA5NjEzNDA3MH0.ApNWoASUkODft8UpetMCALx9baRRfT0-oSce1DVbdd0';
         
         // 動態載入 Supabase SDK
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
@@ -260,11 +260,11 @@
             }, 15000);
         }
         
-        // 載入留言
+        // 載入留言 - 使用新表名 test_message
         async function loadMessages() {
             try {
                 const { data, error } = await supabase
-                    .from('messages')
+                    .from('test_message')  // ✅ 已修改：messages → test_message
                     .select('*')
                     .order('created_at', { ascending: false });
                 
@@ -301,7 +301,7 @@
             `).join('');
         }
         
-        // 發送留言
+        // 發送留言 - 使用新表名 test_message
         async function postMessage() {
             const username = document.getElementById('username').value.trim();
             const content = document.getElementById('content').value.trim();
@@ -335,7 +335,7 @@
             
             try {
                 const { data, error } = await supabase
-                    .from('messages')
+                    .from('test_message')  // ✅ 已修改：messages → test_message
                     .insert([{ 
                         username: username, 
                         content: content 
@@ -420,7 +420,7 @@
         // 每 60 秒自動刷新留言
         setInterval(loadMessages, 60000);
         
-        console.log('✅ 留言板初始化成功，Supabase 已連接');
+        console.log('✅ 留言板初始化成功，Supabase 已連接（使用 test_message 表）');
     </script>
 </body>
 </html>
