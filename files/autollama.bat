@@ -5,7 +5,7 @@ chcp 65001 >nul
 title llama 啟動器
 
 :: 可直接執行，批次檔會檢查本身目錄下，是否有llamacpp和模型
-:: You can fix setting for yourself, near line 10 / line 390
+:: You can fix setting for yourself, near line 10 / line 420
 
 set "DEFAULT_BASE_DIR=C:\AI\Chat Completion"
 set "DEFAULT_API_KEY=temp"
@@ -23,6 +23,7 @@ set "MODEL_N=0"
 set "MMPROJ_N=0"
 set "API_KEY="
 set "USE_JINJA=1"
+set "USE_DRAFT_MTP=0"
 
 
 :parse_args
@@ -213,7 +214,7 @@ if errorlevel 1 (
 
 :scan_mmproj
 echo.
-echo ======== mmproj 視覺投影模型清單 =========
+echo === mmproj 視覺投影模型清單 ==============
 echo === 唯一且檔名 75%% 以上相似會自動選擇 ===
 echo.
 
@@ -344,8 +345,10 @@ echo !TARGET_MMPROJ_NAME!
 
 :api_key_menu
 echo.
+echo.
 echo ====== API Key 設定 ======
 if defined API_KEY (
+    echo.
     echo 已由參數或預設值帶入 API Key：!API_KEY!
     goto jinja_menu
 )
@@ -372,22 +375,43 @@ goto jinja_menu
 
 :jinja_menu
 echo.
-echo ====== jinja 模板 ======
+echo.
+echo == jinja 參數（聊天模板） ========
+echo == 模型自帶模板的，通常都會開啟 ==
+echo.
 echo 使用參數 --jinja？ 5 秒後自動選 Y
 choice /c YN /n /t 5 /d Y /m " [Y/N] "
 
 if errorlevel 2 (
     set "USE_JINJA=0"
-    goto gpu_menu
+    goto draft_mtp_menu
 )
 
 set "USE_JINJA=1"
+goto draft_mtp_menu
+
+:draft_mtp_menu
+echo.
+echo.
+echo == draft-mtp 參數（推測解碼功能） ===
+echo == 模型本身就支援 MTP 的架構才有效 ==
+echo.
+echo 啟用 --spec-type draft-mtp？ 5 秒後自動選 N
+choice /c YN /n /t 5 /d N /m " [Y/N] "
+
+if errorlevel 2 (
+    set "USE_DRAFT_MTP=0"
+    goto gpu_menu
+)
+
+set "USE_DRAFT_MTP=1"
 goto gpu_menu
 
 :gpu_menu
 :: 調高 BATCH 和 UBATCH 可加快處理效率但可能不穩定
 set "BATCH=2048"
 set "UBATCH=512"
+echo.
 echo.
 echo ====== 設定啟動參數 ======
 echo 主要調整 CTX（上下文限制）和 PREDICT（輸出上限）
@@ -404,9 +428,9 @@ call :add_gpu_profile 4 "四檔-上下文131K-輸出32k" "auto" "4:建議 20GB V
 call :add_gpu_profile 5 "五檔-上下文262K-輸出65k" "auto" "5:建議 24GB VRAM 的顯示卡： CTX=262144 PREDICT=65536"
 echo.
 
-call :add_gpu_profile 11 "testing-262k-131k" "999" "test_11： CTX=262144 PREDICT=131072"
+call :add_gpu_profile 11 "test-1M-262k" "999" "test_11： CTX=1048576 PREDICT=262144"
 
-call :add_gpu_profile 12 "測試用-524k-65k" "auto" "測試用編號12： CTX=524288 PREDICT=65536"
+call :add_gpu_profile 12 "測試用-131k-不限" "auto" "測試用編號12： CTX=131072 PREDICT=-1"
 echo.
 
 if defined GPU_PROFILE_ERROR (
@@ -462,6 +486,9 @@ if "!USE_JINJA!"=="1" (
 ) else (
   echo   --no-jinja
 )
+if "!USE_DRAFT_MTP!"=="1" (
+  echo   --spec-type draft-mtp
+)
 echo   -lv 3
 echo   --host 127.0.0.1
 echo   --port 8080
@@ -481,6 +508,9 @@ set "API_KEY_ARG="
 if defined API_KEY set "API_KEY_ARG=--api-key ""!API_KEY!"""
 set "JINJA_ARG=--no-jinja"
 if "!USE_JINJA!"=="1" set "JINJA_ARG=--jinja"
+set "DRAFT_MTP_ARG="
+if "!USE_DRAFT_MTP!"=="1" set "DRAFT_MTP_ARG=--spec-type draft-mtp"
+
 pushd "!TARGET_DIR!"
 
 if "!USE_VISION!"=="1" (
@@ -495,7 +525,7 @@ if "!USE_VISION!"=="1" (
         !JINJA_ARG! ^
         -lv 3 ^
         --host 127.0.0.1 ^
-        --port 8080 !API_KEY_ARG!
+        --port 8080 !API_KEY_ARG! !DRAFT_MTP_ARG!
 ) else (
     llama-server.exe ^
         -m "!TARGET_MODEL!" ^
@@ -507,7 +537,7 @@ if "!USE_VISION!"=="1" (
         !JINJA_ARG! ^
         -lv 3 ^
         --host 127.0.0.1 ^
-        --port 8080 !API_KEY_ARG!
+        --port 8080 !API_KEY_ARG! !DRAFT_MTP_ARG!
 )
 
 if errorlevel 1 (

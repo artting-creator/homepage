@@ -101,11 +101,67 @@
      0 2px 4px rgba(0, 0, 0, 0.5);
    white-space: nowrap;
  }
- 
+
+.signboard-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  min-width: 140px;
+  background:
+    repeating-linear-gradient(
+      87deg,
+      transparent,
+      transparent 3px,
+      rgba(0, 0, 0, 0.04) 3px,
+      rgba(0, 0, 0, 0.04) 6px
+    ),
+    linear-gradient(180deg, #b8860b 0%, #9a7209 100%);
+  border: 3px solid #6b4e0a;
+  border-radius: 6px;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.signboard.open .signboard-menu {
+  display: block;
+}
+
+.signboard-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  cursor: pointer;
+  color: #f5e6c8;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.12),
+    0 -1px 0 rgba(0, 0, 0, 0.4);
+  transition: background 0.15s;
+}
+
+.signboard-menu-item:hover {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.signboard-menu-item svg {
+  width: 18px;
+  height: 18px;
+}
+
  /* ===== Center Buttons ===== */
 .btn-group {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 20px;
   align-items: center;
   justify-content: center;

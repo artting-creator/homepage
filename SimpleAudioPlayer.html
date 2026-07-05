@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>簡易音樂播放器 SimpleAudioPlayer - 封閉測試募集中</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6C5CE7;
+      --secondary: #A29BFE;
+    }
+    
+    html {
+      overflow-x: hidden;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      background-image: linear-gradient(155deg, rgba(237, 246, 255, 0.45), rgba(247, 249, 252, 0.25)), url("./bg-home.jpg");
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: #102a43;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      padding: 2rem;
+      transition: background-image 0.3s ease;
+    }
+    
+    body.dark {
+      background-image: linear-gradient(155deg, rgba(8, 18, 30, 0.72), rgba(12, 22, 40, 0.58)), url("./bg-home.jpg");
+      color: #c8d6e5;
+    }
+    
+    body.dark p, body.dark .subtitle { color: #b2bec3; }
+    body.dark h1 { background: none; color: #fff; -webkit-text-fill-color: initial; }
+    body.dark .glass-card { background: rgba(0, 0, 0, 0.4); border-color: rgba(255, 255, 255, 0.1); }
+    body.dark .feature-item { background: rgba(0, 0, 0, 0.3); }
+    body.dark .notice { background: rgba(0, 0, 0, 0.3); color: #dfe6e9; border-left-color: #feca57; }
+    body.dark .step-box { background: rgba(0, 0, 0, 0.3); }
+
+    /* Top Bar & Button Styles from Homepage */
+    .top-bar { position: fixed; top: 28px; right: 28px; z-index: 50; display: flex; gap: 8px; }
+    .theme-btn, .select-button { background: rgba(255, 255, 255, 0.82); backdrop-filter: blur(4px); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 10px; padding: 10px 16px; font-family: inherit; font-size: 0.95rem; color: #102a43; cursor: pointer; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
+    body.dark .theme-btn, body.dark .select-button { background: rgba(25, 35, 55, 0.82); border-color: rgba(100, 130, 180, 0.25); color: #c8d6e5; }
+    .custom-select { position: relative; display: inline-block; }
+    .select-options { display: none; position: absolute; top: calc(100% + 4px); left: 0; min-width: 120px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 100; overflow: hidden; }
+    .custom-select.open .select-options { display: block; }
+    .option { padding: 8px 14px; cursor: pointer; font-size: 0.9rem; color: #102a43; }
+    .option:hover { background: rgba(15, 118, 110, 0.1); }
+    body.dark .select-options { background: rgba(25, 35, 55, 0.85); border-color: rgba(100, 130, 180, 0.2); }
+    body.dark .option { color: #c8d6e5; }
+    body.dark .option:hover { background: rgba(91, 140, 255, 0.15); }
+
+    .home-btn { position: fixed; top: 28px; left: 28px; z-index: 50; padding: 10px 16px; background: rgba(255,255,255,0.82); backdrop-filter: blur(4px); border-radius: 10px; color: #102a43; text-decoration: none; border: 1px solid rgba(255,255,255,0.5); font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.2s; }
+    .home-btn:hover { background: rgba(255, 255, 255, 0.95); transform: translateY(-2px); }
+    body.dark .home-btn { background: rgba(25, 35, 55, 0.82); border-color: rgba(100, 130, 180, 0.25); color: #c8d6e5; }
+    body.dark .home-btn:hover { background: rgba(35, 50, 75, 0.9); }
+
+    /* Transparent Modes */
+    body.transparent .glass-card { background: rgba(255, 255, 255, 0.2); }
+    body.transparent .feature-item { background: rgba(255, 255, 255, 0.15); }
+    body.transparent .home-btn, body.transparent .theme-btn { background: rgba(255, 255, 255, 0.4); }
+    body.dark.transparent .glass-card { background: rgba(0, 0, 0, 0.15); border-color: rgba(255, 255, 255, 0.05); }
+    body.dark.transparent .feature-item { background: rgba(0, 0, 0, 0.1); }
+    body.dark.transparent .notice { background: rgba(0, 0, 0, 0.1); }
+    body.dark.transparent .step-box { background: rgba(0, 0, 0, 0.1); }
+    body.dark.transparent .home-btn, body.dark.transparent .theme-btn { background: rgba(25, 35, 55, 0.4); border-color: rgba(100, 130, 180, 0.15); }
+
+
+
+    .container {
+      max-width: 900px;
+      width: 100%;
+      z-index: 1;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeInDown 1s ease-out;
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #102a43;
+      text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: #2c3e50;
+      font-weight: 500;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 20px;
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+      animation: fadeInUp 1s ease-out backwards;
+    }
+
+    .glass-card:nth-child(2) { animation-delay: 0.2s; }
+    .glass-card:nth-child(3) { animation-delay: 0.4s; }
+
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      color: #0984e3;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    p {
+      margin-bottom: 1rem;
+      color: #2d3436;
+    }
+
+    .step-box {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid var(--primary);
+    }
+
+    .step-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #6c5ce7;
+      margin-bottom: 0.5rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+      margin-top: 0.5rem;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(108, 92, 231, 0.6);
+    }
+
+    .notice {
+      font-size: 0.95rem;
+      color: #2d3436;
+      background: rgba(255, 255, 255, 0.5);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1.5rem;
+      border-left: 3px solid #feca57;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .feature-item {
+      background: rgba(255, 255, 255, 0.4);
+      padding: 1.5rem;
+      border-radius: 15px;
+      border: 1px solid rgba(255,255,255,0.5);
+      transition: all 0.3s ease;
+    }
+
+    .feature-item:hover {
+      background: rgba(255,255,255,0.7);
+      transform: translateY(-5px);
+    }
+
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #0984e3;
+      margin-bottom: 0.5rem;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      color: #636e72;
+      font-size: 0.9rem;
+    }
+    body.dark .footer { border-top-color: rgba(255,255,255,0.1); color: #b2bec3; }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Screenshots */
+    .screenshots-container {
+      display: flex;
+      gap: 1.5rem;
+      overflow-x: auto;
+      padding: 1rem 0 1.5rem;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(108, 92, 231, 0.4) transparent;
+      -webkit-overflow-scrolling: touch;
+    }
+    .screenshots-container::-webkit-scrollbar {
+      height: 8px;
+    }
+    .screenshots-container::-webkit-scrollbar-thumb {
+      background: rgba(108, 92, 231, 0.4);
+      border-radius: 4px;
+    }
+    .screenshot {
+      flex: 0 0 auto;
+      width: 220px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      border: 1px solid rgba(128,128,128,0.25);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+    }
+    .screenshot:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 2.2rem; }
+      .glass-card { padding: 1.5rem; }
+      header { margin-top: 4rem; }
+      .top-bar { top: 16px; right: 16px; }
+      .home-btn { top: 16px; left: 16px; padding: 8px 12px; font-size: 0.88rem; }
+      .theme-btn { padding: 8px 12px; font-size: 0.88rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 返回首頁 -->
+  <a href="./index.html" class="home-btn">🏠 <span data-i18n="home">返回首頁</span></a>
+
+  <!-- 右上角工具列 -->
+  <div class="top-bar">
+    <button id="themeToggle" class="theme-btn">☀️ 淺色</button>
+  </div>
+
+
+
+  <div class="container">
+    <header>
+      <h1>簡易音樂播放器</h1>
+    </header>
+
+    <!-- 測試招募區塊 -->
+    <section class="glass-card">
+      <h2>🚀 封測中</h2>
+      <p class="subtitle">大家好，這是我開發的一款小工具「簡易音樂播放器」，為您帶來最純粹的聆聽體驗。</p>
+      
+      <div class="step-box">
+        <div class="step-title">1️⃣ 第一步：加入 Google 群組</div>
+        <p>封測的軟體需要有對應的測試群組，才能從 play 商店下載該軟體。<br>
+加入時「不需要」連結至我的google帳戶個人資料。<br>
+加入後「不需要」在群組發文。<br>
+當然維持預設勾選也沒問題，發文也沒有影響。</p>
+        <a href="https://groups.google.com/g/simple-audio-player" target="_blank" class="btn">前往加入 Google 群組</a>  https://groups.google.com/g/simple-audio-player
+      </div>
+
+      <div class="step-box">
+        <div class="step-title">2️⃣ 第二步：接受成為測試人員</div>
+        <p>加入群組後，點擊下方測試連結，接受成為測試人員。接著點擊「download it on Google Play」，即可開啟 Play 商店安裝軟體。</p>
+        <a href="https://play.google.com/apps/testing/com.dy.simpleaudioplayer" target="_blank" class="btn">取得測試應用程式</a>  https://play.google.com/apps/testing/com.dy.simpleaudioplayer
+      </div>
+
+      <div class="notice">
+        <strong>💡 測試說明：</strong><br>
+        Google對新註冊的個人開發者，要求至少有12人+14天的連續封測，並且先列出測試者白名單才給你測試。<br>利用群組功能已經是最簡化的辦法 @@～<br>歡迎反饋問題和需求。<br>
+      </div>
+    </section>
+
+    <!-- 功能特色區塊 -->
+    <section class="glass-card">
+      <h2>🎵 核心功能特色</h2>
+      <p>您可以簡單的聽首歌、睡前循環播放白噪音，或者搭配字幕聽書，簡單實用！<br>
+      <div style="color: #ff9f43;">(目前版本僅支援播放單一檔案，沒有播放列表功能)</div></p>
+
+      <div class="features-grid">
+        <div class="feature-item">
+          <div class="feature-icon">🎧</div>
+          <div class="feature-title">完美本地播放</div>
+          <p>支援手機內各類常見音訊檔案播放，完善的背景機制，即使手機螢幕關閉或切換到其他 App，音樂也能穩定播放，體驗不中斷。</p>
+        </div>
+        
+        <div class="feature-item">
+          <div class="feature-icon">⏱️</div>
+          <div class="feature-title">獨家睡眠定時器</div>
+          <p>不僅支援傳統的「按時間」倒數關閉，還獨家支援「按播放次數」定時！您可以設定同一首歌曲循環播放數次後自動停止，非常適合睡前聆聽或語言學習。</p>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">📝</div>
+          <div class="feature-title">動態歌詞支援</div>
+          <p>支援 SRT 格式動態字幕，以及其它格式的靜態字幕。看著歌詞跟著哼唱，學習外語或聽歌更有感覺。</p>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">✨</div>
+          <div class="feature-title">現代化介面</div>
+          <p>可切換淺色與深色主題，介面乾淨直覺。內建繁中、簡中、英文、日文語言，提供流暢的視覺體驗。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 預覽畫面區塊 -->
+    <section class="glass-card">
+      <h2>📸 軟體預覽</h2>
+      <div class="screenshots-container">
+        <img src="./picture/Screenshot_2026-07-02-13-50-38-021_com.dy.simpleaudioplayer.jpg" alt="Preview 1" class="screenshot">
+        <img src="./picture/Screenshot_2026-07-02-15-10-08-051_com.dy.simpleaudioplayer.jpg" alt="Preview 2" class="screenshot">
+        <img src="./picture/Screenshot_2026-07-02-15-11-00-035_com.dy.simpleaudioplayer.jpg" alt="Preview 3" class="screenshot">
+        <img src="./picture/Screenshot_2026-07-02-18-08-07-473_com.dy.simpleaudioplayer.jpg" alt="Preview 4" class="screenshot">
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>Powered by Artting | 簡易音樂播放器 SimpleAudioPlayer</p>
+      <p>聯絡信箱：<a href="mailto:altus.dy@gmail.com" style="color: inherit;">altus.dy@gmail.com</a></p>
+      <p><a href="./google_developer_policy.htm" style="color: inherit;">隱私權政策 (Privacy Policy)</a></p>
+    </footer>
+  </div>
+
+  <script>
+    (function(){
+      const themeBtn=document.getElementById("themeToggle");
+      const labels = {
+        "light": "☀️ 淺色",
+        "light-transparent": "☀️ 透明",
+        "dark": "🌙 深色",
+        "dark-transparent": "🌙 透明"
+      };
+
+      function setTheme(mode){
+        document.body.classList.remove("dark", "transparent");
+        if(mode==="light-transparent"){document.body.classList.add("transparent")}
+        else if(mode==="dark"){document.body.classList.add("dark")}
+        else if(mode==="dark-transparent"){document.body.classList.add("dark", "transparent")}
+        localStorage.setItem("theme",mode);
+        themeBtn.textContent = labels[mode] || labels["light"];
+      }
+
+      setTheme(localStorage.getItem("theme")||"light");
+
+      themeBtn.addEventListener("click",function(){
+        const isDark=document.body.classList.contains("dark");
+        const isTransparent=document.body.classList.contains("transparent");
+        if(!isDark && !isTransparent) setTheme("light-transparent");
+        else if(!isDark && isTransparent) setTheme("dark");
+        else if(isDark && !isTransparent) setTheme("dark-transparent");
+        else setTheme("light");
+      });
+    })();
+  </script>
+</body>
+</html>

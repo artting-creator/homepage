@@ -7,21 +7,21 @@
    <link rel="stylesheet" href="./style.css">
  </head>
  <body>
-   <!-- Signboard -->
-   <div class="signboard">
-     <div class="signboard-chain"></div>
-     <div class="signboard-ring"></div>
-     <div class="signboard-body">
-       <h1>Artting 小工具站</h1>
-     </div>
+  <!-- Signboard -->
+  <div class="signboard" id="signboardWrapper">
+    <div class="signboard-body" id="signboardBtn" style="cursor: pointer;">
+      <h1 style="display: flex; align-items: center; gap: 6px;">
+        Artting 小工具站 <span style="font-size: 0.7em;">&#9660;</span>
+      </h1>
     </div>
- 
-   <!-- Other Files Button -->
-   <div class="folder-btn" id="folderBtn">
-     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-       <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-     </svg>
-     <span data-i18n="other-files">其它檔案</span>
+    <div class="signboard-menu" id="signboardOptions">
+      <div class="signboard-menu-item" id="folderBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span data-i18n="other-files">其它檔案</span>
+      </div>
+    </div>
    </div>
  
    <!-- File Panel -->
@@ -56,27 +56,26 @@
     <button id="themeToggle" class="theme-btn">☀️ 淺色</button>
    </div>
  
-  <!-- Converter (left) -->
-  <div class="converter-side">
-    <a href="./tools/GBK_BIG5_UI.html" target="_blank" rel="opener">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-      </svg>
-      <span data-i18n="converter">繁簡轉換器</span>
-    </a>
-  </div>
+
  
   <!-- Center action buttons -->
   <div class="btn-group">
 
-      <a class="tool-btn forum-accent" href="./MessageBoard/mainBoard.html" target="_blank" rel="noopener">
+      <a class="tool-btn tool-accent" href="./tools/GBK_BIG5_UI.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+        </svg>
+        <span class="btn-label" data-i18n="converter">繁簡轉換器</span>
+      </a>
+
+      <a class="tool-btn forum-accent" href="./MessageBoard/index.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
         </svg>
         <span class="btn-label" data-i18n="board">留言板</span>
      </a>
 
-      <a class="tool-btn test-accent" href="./not_found.html" target="_blank" rel="opener">
+      <a class="tool-btn test-accent" href="./SimpleAudioPlayer.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/>
           <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
@@ -169,16 +168,24 @@
          applyLang(this.dataset.value);
        });
      });
-     document.addEventListener("click",function(){
-       langSelectWrapper.classList.remove("open");
-      });
+      const signboardBtn = document.getElementById("signboardBtn");
+      const signboardWrapper = document.getElementById("signboardWrapper");
+      if(signboardBtn) {
+        signboardBtn.addEventListener("click", function(e){
+          e.stopPropagation();
+          signboardWrapper.classList.toggle("open");
+        });
+      }
+      document.addEventListener("click",function(){
+        langSelectWrapper.classList.remove("open");
+        if(signboardWrapper) signboardWrapper.classList.remove("open");
+       });
     // ===== File Explorer =====
     const filesData = [
       { name: "autollama.bat", desc: "llama.cpp 啟動器腳本，支援多模型選擇、API 金鑰配置與 Jinja 模板，可一鍵啟動 LLM 推論伺服器。", path: "./files/autollama.bat" },
       { name: "start-chrome-debug-9222.bat", desc: "以遠端除錯模式啟動 Chrome 瀏覽器，連接埠 9222，供自動化工具或爬蟲程式連接操控。", path: "./files/start-chrome-debug-9222.bat" },
       { name: "Start-SillyTavern.bat", desc: "SillyTavern 酒館的前端啟動腳本，在酒館安裝目錄下執行。簡易防呆，不更新版本，有缺node_modules目錄才用最精簡的參數安裝依賴，接著以正式產品模式執行（效能最佳化）。", path: "./files/Start-SillyTavern.bat" },
-      { name: "UpdateComfyUI.bat", desc: "ComfyUI 一鍵更新工具，自動拉取最新版本並更新依賴套件，保持繪圖工作流程順暢。", path: "./files/UpdateComfyUI.bat" },
-      { name: "酒館助手參考文件-types-手機或AI官網用.txt", desc: "SillyTavern 酒館助手 TypeScript 型別定義參考文件，包含 Audio、Chat、Plugin 等完整型別，可於手機端或 AI 官網查閱。", path: "./files/酒館助手參考文件-types-手機或AI官網用.txt" }
+      { name: "UpdateComfyUI.bat", desc: "ComfyUI 一鍵更新工具，自動拉取最新版本並更新依賴套件，保持繪圖工作流程順暢。", path: "./files/UpdateComfyUI.bat" }
     ];
     i18n["zh-TW"]["other-files"]="其它檔案";i18n["zh-TW"]["select-file"]="請點選檔案查看說明";
     i18n["zh-CN"]["other-files"]="其它文件";i18n["zh-CN"]["select-file"]="请点击文件查看说明";
@@ -194,7 +201,7 @@
       const fileListEl=document.getElementById("fileList");
       const descContent=document.getElementById("fileDescContent");
       const descArea=document.getElementById("fileDescArea");
-      folderBtn.addEventListener("click",function(e){e.stopPropagation();filePanel.classList.toggle("open");});
+       folderBtn.addEventListener("click",function(e){e.stopPropagation();filePanel.classList.toggle("open");if(signboardWrapper)signboardWrapper.classList.remove("open");});
       closeBtn.addEventListener("click",function(){filePanel.classList.remove("open");});
       filesData.forEach(function(file){
         const item=document.createElement("div");item.className="file-item";
