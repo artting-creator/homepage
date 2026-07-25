@@ -75,7 +75,7 @@
         <span class="btn-label" data-i18n="board">留言板</span>
      </a>
 
-      <a class="tool-btn test-accent" href="./SimpleAudioPlayer.html">
+      <a class="tool-btn test-accent" href="./SimpleAudioPlayer/SimpleAudioPlayer.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/>
           <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
@@ -180,7 +180,13 @@
         langSelectWrapper.classList.remove("open");
         if(signboardWrapper) signboardWrapper.classList.remove("open");
        });
-    // ===== File Explorer =====
+     // ===== 依網域決定是否隱藏留言板按鈕 (例如在 neocities 隱藏) =====
+     if (window.location.hostname.includes('neocities.org')) {
+       const boardBtn = document.querySelector('.forum-accent');
+       if (boardBtn) boardBtn.style.display = 'none';
+     }
+
+     // ===== File Explorer =====
     const filesData = [
       { name: "autollama.bat", desc: "llama.cpp 啟動器腳本，支援多模型選擇、API 金鑰配置與 Jinja 模板，可一鍵啟動 LLM 推論伺服器。", path: "./files/autollama.bat" },
       { name: "start-chrome-debug-9222.bat", desc: "以遠端除錯模式啟動 Chrome 瀏覽器，連接埠 9222，供自動化工具或爬蟲程式連接操控。", path: "./files/start-chrome-debug-9222.bat" },
