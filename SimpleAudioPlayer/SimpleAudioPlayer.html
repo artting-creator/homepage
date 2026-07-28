@@ -3,16 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>簡易音樂播放器 SimpleAudioPlayer - 封閉測試募集中</title>
+  <title>簡易音樂播放器 SimpleAudioPlayer - 公測開放中</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #6C5CE7;
+      --primary-hover: #5b4bc4;
       --secondary: #A29BFE;
+      --accent: #00cec9;
+      --play-green: #01875f;
+      --play-green-hover: #016c4c;
+      --text-main: #102a43;
+      --text-sub: #2c3e50;
     }
     
     html {
       overflow-x: hidden;
+      scroll-behavior: smooth;
     }
 
     * {
@@ -27,15 +34,15 @@
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
-      color: #102a43;
+      color: var(--text-main);
       line-height: 1.6;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       overflow-x: hidden;
-      padding: 2rem;
-      transition: background-image 0.3s ease;
+      padding: 2rem 1rem;
+      transition: background-image 0.3s ease, color 0.3s ease;
     }
     
     body.dark {
@@ -45,169 +52,380 @@
     
     body.dark p, body.dark .subtitle { color: #b2bec3; }
     body.dark h1 { background: none; color: #fff; -webkit-text-fill-color: initial; }
-    body.dark .glass-card { background: rgba(0, 0, 0, 0.4); border-color: rgba(255, 255, 255, 0.1); }
-    body.dark .feature-item { background: rgba(0, 0, 0, 0.3); }
-    body.dark .notice { background: rgba(0, 0, 0, 0.3); color: #dfe6e9; border-left-color: #feca57; }
-    body.dark .step-box { background: rgba(0, 0, 0, 0.3); }
+    body.dark .glass-card { background: rgba(15, 23, 42, 0.65); border-color: rgba(255, 255, 255, 0.12); }
+    body.dark .feature-item { background: rgba(0, 0, 0, 0.3); border-color: rgba(255, 255, 255, 0.08); }
+    body.dark .notice { background: rgba(255, 243, 205, 0.08); color: #dfe6e9; border-left-color: #f1c40f; }
+    body.dark .keyword-tag { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); color: #64ffda; }
 
-    /* Top Bar & Button Styles from Homepage */
-    .top-bar { position: fixed; top: 28px; right: 28px; z-index: 50; display: flex; gap: 8px; }
-    .theme-btn, .select-button { background: rgba(255, 255, 255, 0.82); backdrop-filter: blur(4px); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 10px; padding: 10px 16px; font-family: inherit; font-size: 0.95rem; color: #102a43; cursor: pointer; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
-    body.dark .theme-btn, body.dark .select-button { background: rgba(25, 35, 55, 0.82); border-color: rgba(100, 130, 180, 0.25); color: #c8d6e5; }
-    .custom-select { position: relative; display: inline-block; }
-    .select-options { display: none; position: absolute; top: calc(100% + 4px); left: 0; min-width: 120px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 100; overflow: hidden; }
-    .custom-select.open .select-options { display: block; }
-    .option { padding: 8px 14px; cursor: pointer; font-size: 0.9rem; color: #102a43; }
-    .option:hover { background: rgba(15, 118, 110, 0.1); }
-    body.dark .select-options { background: rgba(25, 35, 55, 0.85); border-color: rgba(100, 130, 180, 0.2); }
-    body.dark .option { color: #c8d6e5; }
-    body.dark .option:hover { background: rgba(91, 140, 255, 0.15); }
+    /* Top Bar & Home Button */
+    .top-bar { position: fixed; top: 20px; right: 20px; z-index: 50; display: flex; gap: 8px; }
+    .theme-btn, .select-button { 
+      background: rgba(255, 255, 255, 0.85); 
+      backdrop-filter: blur(10px); 
+      border: 1px solid rgba(255, 255, 255, 0.6); 
+      border-radius: 12px; 
+      padding: 10px 18px; 
+      font-family: inherit; 
+      font-size: 0.95rem; 
+      font-weight: 600;
+      color: #102a43; 
+      cursor: pointer; 
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); 
+      transition: all 0.2s ease;
+    }
+    .theme-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+    body.dark .theme-btn, body.dark .select-button { background: rgba(25, 35, 55, 0.85); border-color: rgba(100, 130, 180, 0.3); color: #c8d6e5; }
 
-    .home-btn { position: fixed; top: 28px; left: 28px; z-index: 50; padding: 10px 16px; background: rgba(255,255,255,0.82); backdrop-filter: blur(4px); border-radius: 10px; color: #102a43; text-decoration: none; border: 1px solid rgba(255,255,255,0.5); font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.2s; }
-    .home-btn:hover { background: rgba(255, 255, 255, 0.95); transform: translateY(-2px); }
-    body.dark .home-btn { background: rgba(25, 35, 55, 0.82); border-color: rgba(100, 130, 180, 0.25); color: #c8d6e5; }
-    body.dark .home-btn:hover { background: rgba(35, 50, 75, 0.9); }
+    .home-btn { 
+      position: fixed; 
+      top: 20px; 
+      left: 20px; 
+      z-index: 50; 
+      padding: 10px 18px; 
+      background: rgba(255,255,255,0.85); 
+      backdrop-filter: blur(10px); 
+      border-radius: 12px; 
+      color: #102a43; 
+      text-decoration: none; 
+      border: 1px solid rgba(255,255,255,0.6); 
+      font-weight: 600; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+      transition: all 0.2s ease; 
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .home-btn:hover { background: rgba(255, 255, 255, 0.98); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+    body.dark .home-btn { background: rgba(25, 35, 55, 0.85); border-color: rgba(100, 130, 180, 0.3); color: #c8d6e5; }
+    body.dark .home-btn:hover { background: rgba(35, 50, 75, 0.95); }
 
     /* Transparent Modes */
-    body.transparent .glass-card { background: rgba(255, 255, 255, 0.2); }
-    body.transparent .feature-item { background: rgba(255, 255, 255, 0.15); }
-    body.transparent .home-btn, body.transparent .theme-btn { background: rgba(255, 255, 255, 0.4); }
-    body.dark.transparent .glass-card { background: rgba(0, 0, 0, 0.15); border-color: rgba(255, 255, 255, 0.05); }
-    body.dark.transparent .feature-item { background: rgba(0, 0, 0, 0.1); }
-    body.dark.transparent .notice { background: rgba(0, 0, 0, 0.1); }
-    body.dark.transparent .step-box { background: rgba(0, 0, 0, 0.1); }
-    body.dark.transparent .home-btn, body.dark.transparent .theme-btn { background: rgba(25, 35, 55, 0.4); border-color: rgba(100, 130, 180, 0.15); }
-
-
+    body.transparent .glass-card { background: rgba(255, 255, 255, 0.25); }
+    body.transparent .feature-item { background: rgba(255, 255, 255, 0.2); }
+    body.transparent .home-btn, body.transparent .theme-btn { background: rgba(255, 255, 255, 0.45); }
+    body.dark.transparent .glass-card { background: rgba(0, 0, 0, 0.25); border-color: rgba(255, 255, 255, 0.08); }
+    body.dark.transparent .feature-item { background: rgba(0, 0, 0, 0.18); }
+    body.dark.transparent .notice { background: rgba(0, 0, 0, 0.18); }
+    body.dark.transparent .home-btn, body.dark.transparent .theme-btn { background: rgba(25, 35, 55, 0.5); border-color: rgba(100, 130, 180, 0.2); }
 
     .container {
-      max-width: 900px;
+      max-width: 960px;
       width: 100%;
       z-index: 1;
+      margin-top: 3.5rem;
     }
 
     header {
       text-align: center;
-      margin-bottom: 3rem;
-      animation: fadeInDown 1s ease-out;
+      margin-bottom: 2.5rem;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 16px;
+      border-radius: 50px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      margin-bottom: 1rem;
+      animation: pulseGlow 2s infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      from { box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); }
+      to { box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6); }
     }
 
     h1 {
-      font-size: 3rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
+      font-size: 2.8rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
       color: #102a43;
-      text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);
+      letter-spacing: -0.5px;
     }
 
     .subtitle {
-      font-size: 1.2rem;
-      color: #2c3e50;
+      font-size: 1.15rem;
+      color: #334155;
       font-weight: 500;
+      max-width: 680px;
+      margin: 0 auto;
     }
 
     .glass-card {
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      border-radius: 20px;
-      padding: 2.5rem;
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 24px;
+      padding: 2.2rem;
       margin-bottom: 2rem;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
-      animation: fadeInUp 1s ease-out backwards;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.07);
+      animation: fadeInUp 0.8s ease-out backwards;
+      transition: border-color 0.3s ease, background 0.3s ease;
     }
 
-    .glass-card:nth-child(2) { animation-delay: 0.2s; }
-    .glass-card:nth-child(3) { animation-delay: 0.4s; }
+    .glass-card:nth-child(2) { animation-delay: 0.15s; }
+    .glass-card:nth-child(3) { animation-delay: 0.3s; }
+    .glass-card:nth-child(4) { animation-delay: 0.45s; }
 
     h2 {
-      font-size: 1.8rem;
-      margin-bottom: 1.5rem;
-      color: #0984e3;
+      font-size: 1.65rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      color: #0284c7;
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
+    body.dark h2 {
+      color: #38bdf8;
+    }
+
     p {
       margin-bottom: 1rem;
-      color: #2d3436;
+      color: #334155;
     }
 
-    .step-box {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      border-left: 4px solid var(--primary);
+    /* Primary CTA Buttons */
+    .cta-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+      align-items: center;
+      margin: 1.5rem 0;
     }
 
-    .step-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #6c5ce7;
-      margin-bottom: 0.5rem;
+    .btn-playstore {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.9rem 1.8rem;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--play-green), #006644);
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.05rem;
+      transition: all 0.25s ease;
+      box-shadow: 0 6px 20px rgba(1, 135, 95, 0.35);
     }
 
-    .btn {
-      display: inline-block;
-      padding: 0.8rem 1.5rem;
-      border-radius: 50px;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: #fff;
+    .btn-playstore:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(1, 135, 95, 0.5);
+      background: linear-gradient(135deg, #01996c, #017a52);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.85rem 1.4rem;
+      border-radius: 14px;
+      background: rgba(108, 92, 231, 0.1);
+      color: var(--primary);
+      border: 1.5px solid rgba(108, 92, 231, 0.3);
       text-decoration: none;
       font-weight: 600;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
-      margin-top: 0.5rem;
-    }
-
-    .btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(108, 92, 231, 0.6);
-    }
-
-    .notice {
       font-size: 0.95rem;
-      color: #2d3436;
-      background: rgba(255, 255, 255, 0.5);
-      padding: 1rem;
-      border-radius: 8px;
-      margin-top: 1.5rem;
-      border-left: 3px solid #feca57;
+      transition: all 0.25s ease;
     }
 
+    .btn-secondary:hover {
+      background: rgba(108, 92, 231, 0.2);
+      transform: translateY(-2px);
+      color: var(--primary);
+    }
+
+    body.dark .btn-secondary {
+      background: rgba(162, 155, 254, 0.15);
+      color: #a29bfe;
+      border-color: rgba(162, 155, 254, 0.3);
+    }
+
+    /* Keyword Search Tip Box */
+    .search-guide-box {
+      background: rgba(240, 249, 255, 0.75);
+      border: 1px solid rgba(186, 230, 253, 0.8);
+      border-radius: 16px;
+      padding: 1.4rem 1.6rem;
+      margin-top: 1.5rem;
+      border-left: 5px solid #0284c7;
+    }
+
+    body.dark .search-guide-box {
+      background: rgba(12, 45, 72, 0.45);
+      border-color: rgba(56, 189, 248, 0.25);
+      border-left-color: #38bdf8;
+    }
+
+    .search-guide-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0369a1;
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    body.dark .search-guide-title { color: #7dd3fc; }
+
+    .keyword-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 0.8rem 0;
+    }
+
+    .keyword-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: #ffffff;
+      border: 1.5px dashed #0284c7;
+      border-radius: 10px;
+      font-family: monospace, sans-serif;
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #0369a1;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+
+    .copy-btn {
+      background: #e0f2fe;
+      border: none;
+      color: #0284c7;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover {
+      background: #0284c7;
+      color: #fff;
+    }
+
+    /* Notice box */
+    .notice {
+      font-size: 0.93rem;
+      color: #475569;
+      background: rgba(254, 243, 199, 0.65);
+      padding: 1.1rem 1.3rem;
+      border-radius: 14px;
+      margin-top: 1.25rem;
+      border-left: 4px solid #f59e0b;
+      line-height: 1.6;
+    }
+
+    /* Features Grid */
     .features-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-      margin-top: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.3rem;
+      margin-top: 1.5rem;
     }
 
     .feature-item {
-      background: rgba(255, 255, 255, 0.4);
-      padding: 1.5rem;
-      border-radius: 15px;
-      border: 1px solid rgba(255,255,255,0.5);
+      background: rgba(255, 255, 255, 0.55);
+      padding: 1.6rem;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
       transition: all 0.3s ease;
     }
 
     .feature-item:hover {
-      background: rgba(255,255,255,0.7);
-      transform: translateY(-5px);
+      background: rgba(255, 255, 255, 0.85);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
     }
 
     .feature-icon {
-      font-size: 2rem;
-      margin-bottom: 1rem;
+      font-size: 2.2rem;
+      margin-bottom: 0.8rem;
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 14px;
+      background: rgba(108, 92, 231, 0.1);
     }
 
     .feature-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #0984e3;
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: #0284c7;
       margin-bottom: 0.5rem;
+    }
+
+    body.dark .feature-title { color: #38bdf8; }
+
+    /* WebP Screenshots Grid (Optimized, no Lightbox) */
+    .screenshots-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.25rem;
+      padding: 0.5rem 0;
+    }
+
+    .screenshot-card {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      background: rgba(0,0,0,0.03);
+      aspect-ratio: 9 / 19.5;
+    }
+
+    .screenshot-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .screenshot-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+      padding: 1rem 0.75rem 0.6rem;
+      color: #ffffff;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(15, 23, 42, 0.9);
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 50px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      z-index: 2000;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
     }
 
     .footer {
@@ -215,151 +433,169 @@
       margin-top: 3rem;
       padding-top: 2rem;
       border-top: 1px solid rgba(0, 0, 0, 0.1);
-      color: #636e72;
+      color: #64748b;
       font-size: 0.9rem;
     }
-    body.dark .footer { border-top-color: rgba(255,255,255,0.1); color: #b2bec3; }
+    body.dark .footer { border-top-color: rgba(255,255,255,0.1); color: #94a3b8; }
 
     @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-30px); }
+      from { opacity: 0; transform: translateY(-20px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
     @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
+      from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Screenshots */
-    .screenshots-container {
-      display: flex;
-      gap: 1.5rem;
-      overflow-x: auto;
-      padding: 1rem 0 1.5rem;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(108, 92, 231, 0.4) transparent;
-      -webkit-overflow-scrolling: touch;
-    }
-    .screenshots-container::-webkit-scrollbar {
-      height: 8px;
-    }
-    .screenshots-container::-webkit-scrollbar-thumb {
-      background: rgba(108, 92, 231, 0.4);
-      border-radius: 4px;
-    }
-    .screenshot {
-      flex: 0 0 auto;
-      width: 220px;
-      border-radius: 16px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-      border: 1px solid rgba(128,128,128,0.25);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      cursor: pointer;
-    }
-    .screenshot:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.25);
-    }
-
     @media (max-width: 768px) {
-      h1 { font-size: 2.2rem; }
+      h1 { font-size: 2.1rem; }
       .glass-card { padding: 1.5rem; }
-      header { margin-top: 4rem; }
-      .top-bar { top: 16px; right: 16px; }
-      .home-btn { top: 16px; left: 16px; padding: 8px 12px; font-size: 0.88rem; }
-      .theme-btn { padding: 8px 12px; font-size: 0.88rem; }
+      header { margin-top: 3.5rem; }
+      .top-bar { top: 14px; right: 14px; }
+      .home-btn { top: 14px; left: 14px; padding: 8px 14px; font-size: 0.88rem; }
+      .theme-btn { padding: 8px 14px; font-size: 0.88rem; }
+      .screenshots-container { grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
     }
   </style>
 </head>
 <body>
 
   <!-- 返回首頁 -->
-  <a href="../index.html" class="home-btn">🏠 <span data-i18n="home">返回首頁</span></a>
+  <a href="../index.html" class="home-btn">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+    <span data-i18n="home">首頁</span>
+  </a>
 
   <!-- 右上角工具列 -->
   <div class="top-bar">
     <button id="themeToggle" class="theme-btn">☀️ 淺色</button>
   </div>
 
-
-
   <div class="container">
     <header>
+      <div class="badge-status">
+        <span>🎉</span> 公測進行中 (Open Beta)
+      </div>
       <h1>簡易音樂播放器</h1>
+      <p class="subtitle">專為純粹聆聽打造的 Android 音訊播放器，極簡、穩定、支援睡眠定時、動態字幕與播放列表！</p>
     </header>
 
-    <!-- 測試招募區塊 -->
+    <!-- 公測下載區塊 -->
     <section class="glass-card">
-      <h2>🚀 封測中</h2>
-      <p class="subtitle">大家好，這是我開發的一款小工具「簡易音樂播放器」，為您帶來最純粹的聆聽體驗。</p>
+      <h2>🚀 開放公測體驗</h2>
+      <p>目前已結束封測，正式進入 <strong>Google Play 開放測試 (公測) 階段</strong>！無需預先審核白名單，任何使用者皆可直接前往 Play 商店下載安裝體驗。</p>
       
-      <div class="step-box">
-        <div class="step-title">1️⃣ 第一步：加入 Google 群組</div>
-        <p>封測的軟體需要有對應的測試群組，才能從 play 商店下載該軟體。<br>
-加入時「不需要」連結至我的google帳戶個人資料。<br>
-加入後「不需要」在群組發文。<br>
-當然維持預設勾選也沒問題，發文也沒有影響。</p>
-        <a href="https://groups.google.com/g/simple-audio-player" target="_blank" class="btn">前往加入 Google 群組</a>  https://groups.google.com/g/simple-audio-player
+      <div class="cta-group">
+        <a href="https://play.google.com/store/apps/details?id=com.dy.simpleaudioplayer" target="_blank" class="btn-playstore">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3.609 1.814L13.792 12 3.61 22.186a2.372 2.372 0 0 1-.61-1.615V3.429c0-.624.225-1.19.609-1.615zM15.206 13.414l2.766 2.766-12.784 7.35 10.018-10.116zm0-2.828L5.188.47 17.972 7.82l-2.766 2.766zM19.386 9.234l2.428 1.4c.732.422.732 1.31 0 1.732l-2.428 1.4-2.122-2.122 2.122-2.11z"/>
+          </svg>
+          前往 Play 商店下載
+        </a>
       </div>
 
-      <div class="step-box">
-        <div class="step-title">2️⃣ 第二步：接受成為測試人員</div>
-        <p>加入群組後，點擊下方測試連結，接受成為測試人員。接著點擊「download it on Google Play」，即可開啟 Play 商店安裝軟體。</p>
-        <a href="https://play.google.com/apps/testing/com.dy.simpleaudioplayer" target="_blank" class="btn">取得測試應用程式</a>  https://play.google.com/apps/testing/com.dy.simpleaudioplayer
+      <!-- 搜尋引導 Tip Box -->
+      <div class="search-guide-box">
+        <div class="search-guide-title">
+          <span>🔍</span> 如何在 Play 商店搜尋找到本軟體？
+        </div>
+        <p style="margin-bottom: 0.5rem; font-size: 0.95rem;">
+          因為目前為公測發行階段（尚未轉換為全區正式版），請直接在 Play 商店搜尋框輸入以下關鍵字：
+        </p>
+        <div class="keyword-list">
+          <div class="keyword-tag">
+            簡易音樂播放器 - 定時停止
+            <button class="copy-btn" onclick="copyText('簡易音樂播放器 - 定時停止')">複製</button>
+          </div>
+          <div class="keyword-tag">
+            簡易音樂播放器 dy
+            <button class="copy-btn" onclick="copyText('簡易音樂播放器 dy')">複製</button>
+          </div>
+        </div>
+        <p style="margin-bottom: 0; font-size: 0.88rem; color: #64748b;">
+          💡 提示：建議使用完整名稱或包含作者代號 <code>dy</code>，即可在搜尋結果中快速找到。
+        </p>
       </div>
 
       <div class="notice">
-        <strong>💡 測試說明：</strong><br>
-        Google對新註冊的個人開發者，要求至少有12人+14天的連續封測，並且先列出測試者白名單才給你測試。<br>利用群組功能已經是最簡化的辦法 @@～<br>
-		若已經是測試人員，可直接開啟 play 商店的連結快速更新<br><a href="https://play.google.com/store/apps/details?id=com.dy.simpleaudioplayer" target="_blank" class="btn">play 商店的連結</a> https://play.google.com/store/apps/details?id=com.dy.simpleaudioplayer<br>
-		注意：取得測試應用程式的頁面，可能會同時出現 download it on Google Play，和 Install the public version on Google Play 的連結。<br>
-		實際上作者尚未完成封測審核！幫助封測的人員，請勿安裝 public version<br>
-		兩者內容相同，建議別冒無謂的風險，導致測試進度中斷歸零。<br>
-		歡迎反饋問題和需求。altus.dy@gmail.com<br>
+        <strong>💬 問題與需求回報：</strong><br>
+        感謝每一位參與測試與使用的朋友！如果您在使用過程中有任何建議、需求或問題反饋，歡迎發送電子郵件至：
+        <a href="mailto:altus.dy@gmail.com" style="color: inherit; font-weight: 700;">altus.dy@gmail.com</a><br><br>
+		原封測群組：https://groups.google.com/g/simple-audio-player<br>
+		原封測下載：https://play.google.com/apps/testing/com.dy.simpleaudioplayer
       </div>
     </section>
 
-    <!-- 功能特色區塊 -->
+    <!-- 核心功能特色區塊 (搬至中間) -->
     <section class="glass-card">
       <h2>🎵 核心功能特色</h2>
-      <p>您可以簡單的聽首歌、睡前循環播放白噪音，或者搭配字幕聽書，簡單實用！<br>
-      <div style="color: #ff9f43;">(目前版本僅支援播放單一檔案，沒有播放列表功能)</div></p>
+      <p>無論是聆聽喜愛的音樂歌曲、聽書學習、睡眠定時，或是自訂播放列表，都能給您極簡順暢的聆聽體驗！</p>
+      <p>
+	  系統需求：Android 7.0以上</p>
 
       <div class="features-grid">
         <div class="feature-item">
+          <div class="feature-icon">🎶</div>
+          <div class="feature-title">播放清單功能</div>
+          <p>現已完整支援播放列表功能！您可以自由建立、管理個人播放清單與調整播放順序，連續聆聽輕鬆方便。</p>
+        </div>
+
+        <div class="feature-item">
           <div class="feature-icon">🎧</div>
           <div class="feature-title">完美本地播放</div>
-          <p>支援手機內各類常見音訊檔案播放，完善的背景機制，即使手機螢幕關閉或切換到其他 App，音樂也能穩定播放，體驗不中斷。</p>
+          <p>支援手機內各類常見音訊格式。具備強大的背景播放機制，螢幕鎖屏關閉或切換其他 App 時，音樂依然穩定流暢播放。</p>
         </div>
         
         <div class="feature-item">
           <div class="feature-icon">⏱️</div>
           <div class="feature-title">獨家睡眠定時器</div>
-          <p>不僅支援傳統的「按時間」倒數關閉，還獨家支援「按播放次數」定時！您可以設定同一首歌曲循環播放數次後自動停止，非常適合睡前聆聽或語言學習。</p>
+          <p>除了傳統「按時間倒數」自動關閉，更獨家支援「按播放次數」定時！您可以指定歌曲播放 N 次後自動停止，睡前聽歌或語言學習極度方便。</p>
         </div>
 
         <div class="feature-item">
           <div class="feature-icon">📝</div>
-          <div class="feature-title">動態歌詞支援</div>
-          <p>支援 SRT 格式動態字幕，以及其它格式的靜態字幕。看著歌詞跟著哼唱，學習外語或聽歌更有感覺。</p>
+          <div class="feature-title">動態歌詞字幕</div>
+          <p>完整支援 SRT 格式動態字幕與各類靜態歌詞。跟著字幕對齊哼唱、聽書或研讀外語教材事半功倍。</p>
         </div>
 
         <div class="feature-item">
           <div class="feature-icon">✨</div>
-          <div class="feature-title">現代化介面</div>
-          <p>可切換淺色與深色主題，介面乾淨直覺。內建繁中、簡中、英文、日文語言，提供流暢的視覺體驗。</p>
+          <div class="feature-title">現代化美學介面</div>
+          <p>內建淺色、深色與透明主題切換，視覺體驗極佳。支援繁中、簡中、英文、日文多國語言介面，直覺好上手。</p>
         </div>
       </div>
     </section>
 
-    <!-- 預覽畫面區塊 -->
+    <!-- 預覽畫面區塊 (搬至最下方，WebP 高效載入，無點擊放大) -->
     <section class="glass-card">
       <h2>📸 軟體預覽</h2>
+      
       <div class="screenshots-container">
-        <img src="./picture/Screenshot_2026-07-02-13-50-38-021_com.dy.simpleaudioplayer.jpg" alt="Preview 1" class="screenshot">
-        <img src="./picture/Screenshot_2026-07-02-15-10-08-051_com.dy.simpleaudioplayer.jpg" alt="Preview 2" class="screenshot">
-        <img src="./picture/Screenshot_2026-07-02-15-11-00-035_com.dy.simpleaudioplayer.jpg" alt="Preview 3" class="screenshot">
-        <img src="./picture/Screenshot_2026-07-02-18-08-07-473_com.dy.simpleaudioplayer.jpg" alt="Preview 4" class="screenshot">
+        <div class="screenshot-card">
+          <img src="./picture/2026-07-27-01.webp" alt="播放器主介面" loading="lazy">
+          <div class="screenshot-label">播放器主介面</div>
+        </div>
+        <div class="screenshot-card">
+          <img src="./picture/2026-07-27-02.webp" alt="播放控制與選單" loading="lazy">
+          <div class="screenshot-label">播放控制與選單</div>
+        </div>
+        <div class="screenshot-card">
+          <img src="./picture/2026-07-27-06.webp" alt="獨家睡眠定時器" loading="lazy">
+          <div class="screenshot-label">獨家睡眠定時器</div>
+        </div>
+        <div class="screenshot-card">
+          <img src="./picture/2026-07-27-07.webp" alt="動態字幕與歌詞" loading="lazy">
+          <div class="screenshot-label">動態字幕與歌詞</div>
+        </div>
+        <div class="screenshot-card">
+          <img src="./picture/2026-07-27-08.webp" alt="主題與風格設定" loading="lazy">
+          <div class="screenshot-label">主題與風格設定</div>
+        </div>
+        <div class="screenshot-card">
+          <img src="./picture/2026-07-27-09.webp" alt="進階設定與選項" loading="lazy">
+          <div class="screenshot-label">進階設定與選項</div>
+        </div>
       </div>
     </section>
 
@@ -370,9 +606,12 @@
     </footer>
   </div>
 
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">已複製關鍵字！</div>
+
   <script>
     (function(){
-      const themeBtn=document.getElementById("themeToggle");
+      const themeBtn = document.getElementById("themeToggle");
       const labels = {
         "light": "☀️ 淺色",
         "light-transparent": "☀️ 透明",
@@ -382,24 +621,49 @@
 
       function setTheme(mode){
         document.body.classList.remove("dark", "transparent");
-        if(mode==="light-transparent"){document.body.classList.add("transparent")}
-        else if(mode==="dark"){document.body.classList.add("dark")}
-        else if(mode==="dark-transparent"){document.body.classList.add("dark", "transparent")}
-        localStorage.setItem("theme",mode);
+        if(mode==="light-transparent"){ document.body.classList.add("transparent"); }
+        else if(mode==="dark"){ document.body.classList.add("dark"); }
+        else if(mode==="dark-transparent"){ document.body.classList.add("dark", "transparent"); }
+        localStorage.setItem("theme", mode);
         themeBtn.textContent = labels[mode] || labels["light"];
       }
 
-      setTheme(localStorage.getItem("theme")||"light");
+      setTheme(localStorage.getItem("theme") || "light");
 
-      themeBtn.addEventListener("click",function(){
-        const isDark=document.body.classList.contains("dark");
-        const isTransparent=document.body.classList.contains("transparent");
+      themeBtn.addEventListener("click", function(){
+        const isDark = document.body.classList.contains("dark");
+        const isTransparent = document.body.classList.contains("transparent");
         if(!isDark && !isTransparent) setTheme("light-transparent");
         else if(!isDark && isTransparent) setTheme("dark");
         else if(isDark && !isTransparent) setTheme("dark-transparent");
         else setTheme("light");
       });
     })();
+
+    // Copy Text Toast
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(function() {
+        showToast('已複製關鍵字：' + text);
+      }).catch(function() {
+        // Fallback
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('已複製關鍵字：' + text);
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(function() {
+        toast.classList.remove('show');
+      }, 2500);
+    }
   </script>
 </body>
 </html>
