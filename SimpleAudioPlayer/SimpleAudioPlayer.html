@@ -502,8 +502,8 @@
         </p>
         <div class="keyword-list">
           <div class="keyword-tag">
-            簡易音樂播放器 - 定時停止
-            <button class="copy-btn" onclick="copyText('簡易音樂播放器 - 定時停止')" data-i18n="copy-btn">複製</button>
+            簡易音樂播放器 - 睡眠定時 · 歌詞
+            <button class="copy-btn" onclick="copyText('簡易音樂播放器 - 睡眠定時 · 歌詞')" data-i18n="copy-btn">複製</button>
           </div>
           <div class="keyword-tag">
             簡易音樂播放器 dy
@@ -530,27 +530,33 @@
 
       <div class="features-grid">
         <div class="feature-item">
-          <div class="feature-icon">🎧</div>
-          <div class="feature-title" data-i18n="feat1-title">完美本地播放</div>
-          <p data-i18n="feat1-desc">支援手機內各類常見音訊格式。具備強大的背景播放機制，螢幕鎖屏關閉或切換其他 App 時，音樂依然穩定流暢播放。</p>
+          <div class="feature-icon">🔒</div>
+          <div class="feature-title" data-i18n="feat5-title">沒有網路權限</div>
+          <p data-i18n="feat5-desc">本 App 未申請網路權限，技術上就無法上傳任何東西。不收集、不追蹤、無廣告，所有播放與檔案操作都在您的裝置上完成。</p>
         </div>
-        
+
         <div class="feature-item">
           <div class="feature-icon">⏱️</div>
-          <div class="feature-title" data-i18n="feat2-title">獨家睡眠定時器</div>
-          <p data-i18n="feat2-desc">除了傳統「按時間倒數」自動關閉，更獨家支援「按播放次數」定時！您可以指定歌曲播放 N 次後自動停止，睡前聽歌或語言學習極度方便。</p>
+          <div class="feature-title" data-i18n="feat2-title">三種定時模式</div>
+          <p data-i18n="feat2-desc">依時間倒數、依播放次數、或間隔循環（播放 X 分鐘、休息 Y 分鐘，重複 N 輪）。時間模式還能反過來用，倒數結束後自動開始播放。</p>
         </div>
 
         <div class="feature-item">
           <div class="feature-icon">📝</div>
           <div class="feature-title" data-i18n="feat3-title">動態歌詞字幕</div>
-          <p data-i18n="feat3-desc">支援 SRT 等格式動態字幕與各類靜態歌詞。跟著字幕對齊哼唱、聽書或研讀外語教材事半功倍。</p>
+          <p data-i18n="feat3-desc">支援 SRT 等格式動態字幕與各類靜態歌詞，可調整時間偏移對齊。跟著字幕對齊哼唱、聽書或研讀外語教材事半功倍。</p>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">🎧</div>
+          <div class="feature-title" data-i18n="feat1-title">完美本地播放</div>
+          <p data-i18n="feat1-desc">支援手機內各類常見音訊格式，影片檔也可以只播聲音當成音樂聽。內建播放清單與播放紀錄管理，並自動讀取 ID3 封面。</p>
         </div>
 
         <div class="feature-item">
           <div class="feature-icon">✨</div>
           <div class="feature-title" data-i18n="feat4-title">現代化美學介面</div>
-          <p data-i18n="feat4-desc">內建淺色、深色與透明主題切換，視覺體驗極佳。支援繁中、簡中、英文、日文多國語言介面，直覺好上手。</p>
+          <p data-i18n="feat4-desc">多組主題配色與明暗切換、可調整介面與字幕字級。支援繁中、簡中、英文、日文多國語言介面，直覺好上手。</p>
         </div>
       </div>
     </section>
@@ -561,22 +567,16 @@
       
       <div class="screenshots-container">
         <div class="screenshot-card">
-          <img src="./picture/2026-07-27-01.webp" alt="軟體預覽畫面 1" loading="lazy">
+          <img src="./picture/2026-07-27-01.webp" alt="軟體預覽畫面 1" width="360" height="640" loading="lazy">
         </div>
         <div class="screenshot-card">
-          <img src="./picture/2026-07-27-02.webp" alt="軟體預覽畫面 2" loading="lazy">
+          <img src="./picture/2026-07-27-02.webp" alt="軟體預覽畫面 2" width="360" height="640" loading="lazy">
         </div>
         <div class="screenshot-card">
-          <img src="./picture/2026-07-27-06.webp" alt="軟體預覽畫面 3" loading="lazy">
+          <img src="./picture/2026-07-27-09.webp" alt="軟體預覽畫面 3" width="360" height="640" loading="lazy">
         </div>
         <div class="screenshot-card">
-          <img src="./picture/2026-07-27-07.webp" alt="軟體預覽畫面 4" loading="lazy">
-        </div>
-        <div class="screenshot-card">
-          <img src="./picture/2026-07-27-08.webp" alt="軟體預覽畫面 5" loading="lazy">
-        </div>
-        <div class="screenshot-card">
-          <img src="./picture/2026-07-27-09.webp" alt="軟體預覽畫面 6" loading="lazy">
+          <img src="./picture/2026-08-01-01.webp" alt="軟體預覽畫面 4" width="360" height="640" loading="lazy">
         </div>
       </div>
     </section>
@@ -613,13 +613,15 @@
           "features-desc": "無論是聆聽喜愛的音樂歌曲、聽書學習、睡眠定時，都能給您極簡順暢的聆聽體驗！",
           "sys-req": "系統需求：Android 7.0以上",
           "feat1-title": "完美本地播放",
-          "feat1-desc": "支援手機內各類常見音訊格式。具備強大的背景播放機制，螢幕鎖屏關閉或切換其他 App 時，音樂依然穩定流暢播放。",
-          "feat2-title": "獨家睡眠定時器",
-          "feat2-desc": "除了傳統「按時間倒數」自動關閉，更獨家支援「按播放次數」定時！您可以指定歌曲播放 N 次後自動停止，睡前聽歌或語言學習極度方便。",
+          "feat1-desc": "支援手機內各類常見音訊格式，影片檔也可以只播聲音當成音樂聽。內建播放清單與播放紀錄管理，並自動讀取 ID3 封面。",
+          "feat5-title": "沒有網路權限",
+          "feat5-desc": "本 App 未申請網路權限，技術上就無法上傳任何東西。不收集、不追蹤、無廣告，所有播放與檔案操作都在您的裝置上完成。",
+          "feat2-title": "三種定時模式",
+          "feat2-desc": "依時間倒數、依播放次數、或間隔循環（播放 X 分鐘、休息 Y 分鐘，重複 N 輪）。時間模式還能反過來用，倒數結束後自動開始播放。",
           "feat3-title": "動態歌詞字幕",
-          "feat3-desc": "支援 SRT 等格式動態字幕與各類靜態歌詞。跟著字幕對齊哼唱、聽書或研讀外語教材事半功倍。",
+          "feat3-desc": "支援 SRT 等格式動態字幕與各類靜態歌詞，可調整時間偏移對齊。跟著字幕對齊哼唱、聽書或研讀外語教材事半功倍。",
           "feat4-title": "現代化美學介面",
-          "feat4-desc": "內建主題切換，可自訂封面，視覺體驗極佳。支援繁中、簡中、英文、日文多國語言介面，直覺好上手。",
+          "feat4-desc": "多組主題配色與明暗切換、可調整介面與字幕字級。支援繁中、簡中、英文、日文多國語言介面，直覺好上手。",
           "preview-title": "軟體預覽",
           "t-light": "☀️ 淺色",
           "t-trans": "☀️ 透明",
@@ -646,13 +648,15 @@
           "features-desc": "无论是聆听喜爱的音乐歌曲、听书学习、睡眠定时，都能给您极简顺畅的聆听体验！",
           "sys-req": "系统需求：Android 7.0以上",
           "feat1-title": "完美本地播放",
-          "feat1-desc": "支持手机内各类常见音频格式。具备强大的背景播放机制，屏幕锁屏关闭或切换其他 App 时，音乐依然稳定流畅播放。",
-          "feat2-title": "独家睡眠定时器",
-          "feat2-desc": "除了传统“按时间倒数”自动关闭，更独家支持“按播放次数”定时！您可以指定歌曲播放 N 次后自动停止，睡前听歌或语言学习极度方便。",
+          "feat1-desc": "支持手机内各类常见音频格式，视频文件也可以只播声音当成音乐听。内置播放列表与播放记录管理，并自动读取 ID3 封面。",
+          "feat5-title": "没有网络权限",
+          "feat5-desc": "本 App 未申请网络权限，技术上就无法上传任何东西。不收集、不追踪、无广告，所有播放与文件操作都在您的设备上完成。",
+          "feat2-title": "三种定时模式",
+          "feat2-desc": "按时间倒数、按播放次数、或间隔循环（播放 X 分钟、休息 Y 分钟，重复 N 轮）。时间模式还能反过来用，倒数结束后自动开始播放。",
           "feat3-title": "动态歌词字幕",
-          "feat3-desc": "支持 SRT 等格式动态字幕与各类静态歌词。跟着字幕对齐哼唱、听书或研读外语教材事半功倍。",
+          "feat3-desc": "支持 SRT 等格式动态字幕与各类静态歌词，可调整时间偏移对齐。跟着字幕对齐哼唱、听书或研读外语教材事半功倍。",
           "feat4-title": "现代化美学界面",
-          "feat4-desc": "内置主题切换，可自订封面，视觉体验极佳。支持繁中、简中、英文、日文多国语言界面，直观好上手。",
+          "feat4-desc": "多组主题配色与明暗切换、可调整界面与字幕字号。支持繁中、简中、英文、日文多国语言界面，直观好上手。",
           "preview-title": "软件预览",
           "t-light": "☀️ 浅色",
           "t-trans": "☀️ 透明",
@@ -679,13 +683,15 @@
           "features-desc": "Enjoy a smooth listening experience whether listening to music, audiobooks, or setting sleep timers!",
           "sys-req": "System Requirements: Android 7.0+",
           "feat1-title": "Perfect Local Playback",
-          "feat1-desc": "Supports all common local audio formats. Reliable background playback keeps music playing even when the screen is locked.",
-          "feat2-title": "Exclusive Sleep Timer",
-          "feat2-desc": "In addition to countdown timers, uniquely supports stopping after N plays! Perfect for bed-time music or language learning.",
+          "feat1-desc": "Plays the common audio formats already on your phone, and video files can be played as audio only. Playlists, play history and ID3 cover art included.",
+          "feat5-title": "No Internet Permission",
+          "feat5-desc": "This app does not request the internet permission, so it cannot upload anything even if it wanted to. No tracking, no data collection, no ads.",
+          "feat2-title": "Three Timer Modes",
+          "feat2-desc": "By time, by play count, or interval (play X minutes, rest Y minutes, repeat N rounds). The time mode also runs in reverse and can start playback when the countdown ends.",
           "feat3-title": "Dynamic Subtitles & Lyrics",
-          "feat3-desc": "Supports SRT dynamic subtitles and static lyrics. Sing along, listen to audiobooks, or study languages with ease.",
+          "feat3-desc": "Supports SRT dynamic subtitles and static lyrics, with an adjustable time offset to line them up. Sing along, follow an audiobook, or study languages with ease.",
           "feat4-title": "Modern Aesthetic UI",
-          "feat4-desc": "Built-in theme switching, customizable cover. Supports Traditional Chinese, Simplified Chinese, English, and Japanese UI.",
+          "feat4-desc": "Several color themes with light/dark switching and adjustable UI and subtitle text size. Supports Traditional Chinese, Simplified Chinese, English, and Japanese UI.",
           "preview-title": "App Screenshots",
           "t-light": "☀️ Light",
           "t-trans": "☀️ Transparent",
