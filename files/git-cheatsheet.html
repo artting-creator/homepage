@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git 常用指令備忘</title>
+<style>
+  :root {
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --text: #1f2430;
+    --muted: #6b7385;
+    --line: #e2e6ef;
+    --accent: #3b6fd4;
+    --code-bg: #f0f2f8;
+    --warn-bg: #fff6e5;
+    --warn-line: #e8b45a;
+    --danger-bg: #fdeeee;
+    --danger-line: #dd7b7b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #171a21;
+      --card: #1f232c;
+      --text: #e4e7ee;
+      --muted: #9aa2b4;
+      --line: #2e3440;
+      --accent: #7aa2f7;
+      --code-bg: #262b36;
+      --warn-bg: #33291a;
+      --warn-line: #8a6d3b;
+      --danger-bg: #33201f;
+      --danger-line: #8a4a4a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2rem 1rem 4rem;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", "Microsoft JhengHei", system-ui, sans-serif;
+    line-height: 1.7;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  header { margin-bottom: 2rem; }
+  h1 { font-size: 1.9rem; margin: 0 0 .4rem; }
+  .lead { color: var(--muted); margin: 0; }
+  section {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.25rem 1.4rem;
+    margin-bottom: 1.1rem;
+  }
+  h2 { font-size: 1.15rem; margin: 0 0 .3rem; }
+  .sub { color: var(--muted); font-size: .9rem; margin: 0 0 1rem; }
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: .6rem 1.2rem;
+    align-items: start;
+    padding: .7rem 0;
+    border-top: 1px solid var(--line);
+  }
+  .row:first-of-type { border-top: none; }
+  @media (max-width: 620px) { .row { grid-template-columns: 1fr; gap: .35rem; } }
+  .cmd {
+    display: flex; align-items: center; gap: .5rem;
+    background: var(--code-bg);
+    border-radius: 8px;
+    padding: .45rem .6rem;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: .88rem;
+    overflow-x: auto;
+  }
+  .cmd code { white-space: nowrap; }
+  .copy {
+    margin-left: auto; flex: none;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: .15rem .5rem;
+    font-size: .75rem;
+    cursor: pointer;
+  }
+  .copy:hover { color: var(--accent); border-color: var(--accent); }
+  .desc { font-size: .92rem; }
+  .desc b { color: var(--accent); }
+  .note {
+    border-radius: 10px;
+    padding: .8rem 1rem;
+    font-size: .9rem;
+    margin-top: 1rem;
+    background: var(--warn-bg);
+    border-left: 4px solid var(--warn-line);
+  }
+  .note.danger { background: var(--danger-bg); border-left-color: var(--danger-line); }
+  .flow {
+    display: flex; flex-wrap: wrap; align-items: center; gap: .5rem;
+    font-size: .85rem; margin: 0 0 1rem;
+  }
+  .flow span {
+    background: var(--code-bg); border-radius: 20px; padding: .3rem .8rem;
+  }
+  .flow i { color: var(--muted); font-style: normal; }
+  footer { color: var(--muted); font-size: .85rem; text-align: center; margin-top: 2rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Git 常用指令備忘</h1>
+  <p class="lead">搭配同資料夾的 <code>git-menu.bat</code> 使用；選單裡的每個選項就是下面這些指令。</p>
+</header>
+
+<section>
+  <h2>先搞懂這四個地方</h2>
+  <p class="sub">Git 的指令幾乎都在搬動這四個位置之間的檔案，看懂這張圖，指令就不用背。</p>
+  <div class="flow">
+    <span>工作區<br><small>你正在編輯的檔案</small></span><i>→ add →</i>
+    <span>暫存區<br><small>挑好要提交的</small></span><i>→ commit →</i>
+    <span>本機倉庫<br><small>存成版本</small></span><i>→ push →</i>
+    <span>GitHub<br><small>雲端備份</small></span>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git status -sb</code><button class="copy">複製</button></div>
+    <div class="desc">看檔案現在在哪個階段。<b>不確定的時候先打這個</b>，它幾乎都會告訴你下一步該做什麼。</div>
+  </div>
+</section>
+
+<section>
+  <h2>每天就這五個</h2>
+  <p class="sub">90% 的日常操作。</p>
+  <div class="row">
+    <div class="cmd"><code>git status -sb</code><button class="copy">複製</button></div>
+    <div class="desc">哪些檔案改了、有沒有還沒推上去的提交。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git add -A</code><button class="copy">複製</button></div>
+    <div class="desc">把<b>所有</b>變動（含新增與刪除）放進暫存區，準備提交。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git commit -m "說明文字"</code><button class="copy">複製</button></div>
+    <div class="desc">存成一個版本。訊息寫「改了什麼」，之後找版本時全靠它。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git push</code><button class="copy">複製</button></div>
+    <div class="desc">上傳到 GitHub。<b>沒 push 就只存在這台電腦</b>，電腦壞了就沒了。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git pull</code><button class="copy">複製</button></div>
+    <div class="desc">把遠端的更新抓下來。換電腦或多台機器工作時，<b>動手前先 pull</b>。</div>
+  </div>
+</section>
+
+<section>
+  <h2>看清楚改了什麼</h2>
+  <p class="sub">提交前確認一下，可以避免把不該進去的東西一起提交。</p>
+  <div class="row">
+    <div class="cmd"><code>git diff</code><button class="copy">複製</button></div>
+    <div class="desc">逐行看還沒 add 的修改。畫面停住時按 <b>空白鍵翻頁、q 離開</b>。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git diff --stat</code><button class="copy">複製</button></div>
+    <div class="desc">只看「哪幾個檔案、各改幾行」的摘要，適合快速掃一眼。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git diff --cached</code><button class="copy">複製</button></div>
+    <div class="desc">看<b>已經 add 進暫存區</b>的內容。add 完才想確認時用這個。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git log --oneline --graph -20</code><button class="copy">複製</button></div>
+    <div class="desc">最近 20 筆提交，一行一筆。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git show HEAD</code><button class="copy">複製</button></div>
+    <div class="desc">看最後一次提交到底改了什麼。</div>
+  </div>
+</section>
+
+<section>
+  <h2>出事了怎麼救</h2>
+  <p class="sub">依「損失由小到大」排列，先試上面的。</p>
+  <div class="row">
+    <div class="cmd"><code>git restore 檔名</code><button class="copy">複製</button></div>
+    <div class="desc">單一檔案改壞了，還原成上次提交的樣子。<b>改到一半的內容會消失。</b></div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git restore --staged 檔名</code><button class="copy">複製</button></div>
+    <div class="desc">不小心 add 錯檔案，把它退出暫存區。<b>檔案內容不會變動</b>，很安全。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git commit --amend -m "新訊息"</code><button class="copy">複製</button></div>
+    <div class="desc">改掉剛剛那次提交的訊息或內容。<b>只在還沒 push 之前用</b>。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git reset --soft HEAD~1</code><button class="copy">複製</button></div>
+    <div class="desc">撤銷最後一次提交，但<b>修改全部保留</b>。提交錯了想重來時用這個。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git reflog</code><button class="copy">複製</button></div>
+    <div class="desc">你做過的每個動作紀錄。<b>連 reset 掉的提交都找得回來</b>，救命用。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git reset --hard</code><button class="copy">複製</button></div>
+    <div class="desc">捨棄所有已追蹤檔案的修改。未追蹤的新檔案（<code>??</code>）不受影響。</div>
+  </div>
+  <div class="note danger">
+    <b>reset --hard 沒有反悔的機會。</b>它清掉的是「還沒提交」的內容，這些從來沒進過 Git，所以連 <code>reflog</code> 都救不回來。不確定的話，先用 <code>git stash</code> 把修改暫時收起來，比直接砍掉安全得多。
+  </div>
+</section>
+
+<section>
+  <h2>暫時收起來（stash）</h2>
+  <p class="sub">改到一半但想先做別的事，又不想留下半成品的提交。</p>
+  <div class="row">
+    <div class="cmd"><code>git stash</code><button class="copy">複製</button></div>
+    <div class="desc">把目前的修改收進暫存櫃，工作區恢復乾淨。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git stash pop</code><button class="copy">複製</button></div>
+    <div class="desc">把剛收起來的修改拿回來繼續改。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git stash list</code><button class="copy">複製</button></div>
+    <div class="desc">看暫存櫃裡有幾筆，避免收了忘記拿。</div>
+  </div>
+</section>
+
+<section>
+  <h2>Windows 的換行警告</h2>
+  <p class="sub">每次 add 都跳出一整排 <code>LF will be replaced by CRLF</code> 的解法。</p>
+  <div class="desc" style="margin-bottom:1rem">
+    原因是 Windows 用 CRLF 換行、Git 內部存 LF，設定沒講清楚時 Git 每次都會提醒你一遍。
+    解法是在專案根目錄放一個 <code>.gitattributes</code>，把規則寫死在專案裡，就不會受各台電腦的設定影響：
+  </div>
+  <div class="cmd" style="display:block; white-space:pre; line-height:1.6"><code>* text=auto eol=lf
+
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+*.png binary
+*.jpg binary
+*.webp binary
+*.ico binary
+*.woff2 binary</code></div>
+  <div class="note">
+    <b>放進去還不會馬上安靜</b> —— 警告會先反過來變成 <code>CRLF will be replaced by LF</code>，要讓工作區重新套用規則後才會歸零。建檔後跑一次下面這串，之後就不再出現：
+    <div class="cmd" style="margin-top:.6rem"><code>git add .gitattributes &amp;&amp; git commit -m "加入換行規則" &amp;&amp; git rm --cached -r -q . &amp;&amp; git reset --hard</code><button class="copy">複製</button></div>
+    執行前先確認 <code>git status</code> 是乾淨的（沒有未提交的修改），因為最後那段 <code>reset --hard</code> 會把工作區重新檢出一次。<code>.bat</code> 檔會被自動轉回 CRLF，這是 Windows 批次檔正常執行的必要條件。
+  </div>
+</section>
+
+<section>
+  <h2>第一次設定</h2>
+  <p class="sub">新電腦或新專案才需要，設定過就不用再做。</p>
+  <div class="row">
+    <div class="cmd"><code>git config --global user.name "你的名字"</code><button class="copy">複製</button></div>
+    <div class="desc">提交時記錄的作者名稱。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git config --global user.email "你的信箱"</code><button class="copy">複製</button></div>
+    <div class="desc">要跟 GitHub 帳號的信箱一致，貢獻紀錄才會正確歸戶。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git init</code><button class="copy">複製</button></div>
+    <div class="desc">把現有資料夾變成 Git 專案。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git clone 網址</code><button class="copy">複製</button></div>
+    <div class="desc">把 GitHub 上的專案抓到本機。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git remote -v</code><button class="copy">複製</button></div>
+    <div class="desc">確認這個專案推去哪個 GitHub 倉庫。</div>
+  </div>
+</section>
+
+<footer>
+  Git 常用指令備忘 ｜ 搭配 git-menu.bat 使用
+</footer>
+
+</div>
+
+<script>
+document.querySelectorAll('.copy').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var code = btn.parentElement.querySelector('code').innerText;
+    navigator.clipboard.writeText(code).then(function () {
+      var old = btn.textContent;
+      btn.textContent = '已複製';
+      setTimeout(function () { btn.textContent = old; }, 1200);
+    });
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+# 換行規則由此檔決定，不依賴各機器的 core.autocrlf
+* text=auto eol=lf
+
+# Windows 批次檔必須是 CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# 明確標記二進位，避免被當文字做換行轉換
+*.png binary
+*.jpg binary
+*.webp binary
+*.ico binary
+*.woff2 binary
