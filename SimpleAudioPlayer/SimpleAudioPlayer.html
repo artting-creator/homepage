@@ -484,7 +484,7 @@
       <p data-i18n="open-beta-desc">測試階段已結束，本應用程式正式在 <strong>Google Play 上架</strong>！任何使用者皆可直接前往 Play 商店下載安裝。</p>
       
       <div class="cta-group">
-        <a href="https://play.google.com/store/apps/details?id=com.dy.simpleaudioplayer" target="_blank" class="btn-playstore">
+        <a id="playstore-link" href="https://play.google.com/store/apps/details?id=com.dy.simpleaudioplayer" target="_blank" rel="noopener" class="btn-playstore">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
             <path d="M3.609 1.814L13.792 12 3.61 22.186a2.372 2.372 0 0 1-.61-1.615V3.429c0-.624.225-1.19.609-1.615zM15.206 13.414l2.766 2.766-12.784 7.35 10.018-10.116zm0-2.828L5.188.47 17.972 7.82l-2.766 2.766zM19.386 9.234l2.428 1.4c.732.422.732 1.31 0 1.732l-2.428 1.4-2.122-2.122 2.122-2.11z"/>
           </svg>
@@ -502,16 +502,20 @@
         </p>
         <div class="keyword-list">
           <div class="keyword-tag">
-            簡易音樂播放器 - 睡眠定時 · 歌詞
-            <button class="copy-btn" onclick="copyText('簡易音樂播放器 - 睡眠定時 · 歌詞')" data-i18n="copy-btn">複製</button>
+            簡易音樂播放器
+            <button class="copy-btn" onclick="copyText('簡易音樂播放器')" data-i18n="copy-btn">複製</button>
           </div>
           <div class="keyword-tag">
             簡易音樂播放器 dy
             <button class="copy-btn" onclick="copyText('簡易音樂播放器 dy')" data-i18n="copy-btn">複製</button>
           </div>
+          <div class="keyword-tag">
+            簡易音樂播放器 - 睡眠定時 · 歌詞
+            <button class="copy-btn" onclick="copyText('簡易音樂播放器 - 睡眠定時 · 歌詞')" data-i18n="copy-btn">複製</button>
+          </div>
         </div>
         <p style="margin-bottom: 0; font-size: 0.88rem; color: #64748b;">
-          💡 <span data-i18n="search-tip">提示：建議使用完整名稱或包含作者代號 <code>dy</code>，即可在搜尋結果中快速找到。</span>
+          💡 <span data-i18n="search-tip">提示：通常輸入「簡易音樂播放器」就能找到；若沒出現，請改用完整名稱或加上作者代號 <code>dy</code>。</span>
         </p>
       </div>
 
@@ -537,8 +541,8 @@
 
         <div class="feature-item">
           <div class="feature-icon">⏱️</div>
-          <div class="feature-title" data-i18n="feat2-title">三種定時模式</div>
-          <p data-i18n="feat2-desc">依時間倒數、依播放次數、或間隔循環（播放 X 分鐘、休息 Y 分鐘，重複 N 輪）。時間模式還能反過來用，倒數結束後自動開始播放。</p>
+          <div class="feature-title" data-i18n="feat2-title">四種定時模式</div>
+          <p data-i18n="feat2-desc">依時間倒數、依播放次數、間隔時間（播放 X 分鐘、休息 Y 分鐘，重複 N 輪）、間隔次數（播放 X 首後休息）。結束後可選擇停止、暫停、退出，也能反過來自動開始播放。</p>
         </div>
 
         <div class="feature-item">
@@ -605,7 +609,7 @@
           "search-guide-title": "如何在 Play 商店搜尋找到本軟體？",
           "search-guide-desc": "若在搜尋結果中一時找不到，請直接在 Play 商店搜尋框輸入以下關鍵字：",
           "copy-btn": "複製",
-          "search-tip": "提示：建議使用完整名稱或包含作者代號 dy，即可在搜尋結果中快速找到。",
+          "search-tip": "提示：通常輸入「簡易音樂播放器」就能找到；若沒出現，請改用完整名稱或加上作者代號 dy。",
           "feedback-title": "💬 問題與需求回報：",
           "feedback-desc": "感謝每一位參與測試與使用的朋友！如果您在使用過程中有任何建議、需求或問題反饋，歡迎發送電子郵件至：",
           "orig-beta-group": "原封測群組：",
@@ -616,8 +620,8 @@
           "feat1-desc": "支援手機內各類常見音訊格式，影片檔也可以只播聲音當成音樂聽。內建播放清單與播放紀錄管理，並自動讀取 ID3 封面。",
           "feat5-title": "沒有網路權限",
           "feat5-desc": "本 App 未申請網路權限，技術上就無法上傳任何東西。不收集、不追蹤、無廣告，所有播放與檔案操作都在您的裝置上完成。",
-          "feat2-title": "三種定時模式",
-          "feat2-desc": "依時間倒數、依播放次數、或間隔循環（播放 X 分鐘、休息 Y 分鐘，重複 N 輪）。時間模式還能反過來用，倒數結束後自動開始播放。",
+          "feat2-title": "四種定時模式",
+          "feat2-desc": "依時間倒數、依播放次數、間隔時間（播放 X 分鐘、休息 Y 分鐘，重複 N 輪）、間隔次數（播放 X 首後休息）。結束後可選擇停止、暫停、退出，也能反過來自動開始播放。",
           "feat3-title": "動態歌詞字幕",
           "feat3-desc": "支援 SRT 等格式動態字幕與各類靜態歌詞，可調整時間偏移對齊。跟著字幕對齊哼唱、聽書或研讀外語教材事半功倍。",
           "feat4-title": "現代化美學介面",
@@ -640,7 +644,7 @@
           "search-guide-title": "如何在 Play 商店搜索找到本软件？",
           "search-guide-desc": "若在搜索结果中一时找不到，请直接在 Play 商店搜索框输入以下关键字：",
           "copy-btn": "复制",
-          "search-tip": "提示：建议使用完整名称或包含作者代号 dy，即可在搜索结果中快速找到。",
+          "search-tip": "提示：通常输入「简易音乐播放器」就能找到；若没出现，请改用完整名称或加上作者代号 dy。",
           "feedback-title": "💬 问题与需求反馈：",
           "feedback-desc": "感谢每一位参与测试与使用的朋友！如果您在使用过程中有任何建议、需求或问题反馈，欢迎发送电子邮件至：",
           "orig-beta-group": "原封测群组：",
@@ -651,8 +655,8 @@
           "feat1-desc": "支持手机内各类常见音频格式，视频文件也可以只播声音当成音乐听。内置播放列表与播放记录管理，并自动读取 ID3 封面。",
           "feat5-title": "没有网络权限",
           "feat5-desc": "本 App 未申请网络权限，技术上就无法上传任何东西。不收集、不追踪、无广告，所有播放与文件操作都在您的设备上完成。",
-          "feat2-title": "三种定时模式",
-          "feat2-desc": "按时间倒数、按播放次数、或间隔循环（播放 X 分钟、休息 Y 分钟，重复 N 轮）。时间模式还能反过来用，倒数结束后自动开始播放。",
+          "feat2-title": "四种定时模式",
+          "feat2-desc": "按时间倒数、按播放次数、间隔时间（播放 X 分钟、休息 Y 分钟，重复 N 轮）、间隔次数（播放 X 首后休息）。结束后可选择停止、暂停、退出，也能反过来自动开始播放。",
           "feat3-title": "动态歌词字幕",
           "feat3-desc": "支持 SRT 等格式动态字幕与各类静态歌词，可调整时间偏移对齐。跟着字幕对齐哼唱、听书或研读外语教材事半功倍。",
           "feat4-title": "现代化美学界面",
@@ -675,7 +679,7 @@
           "search-guide-title": "How to find this app on Play Store?",
           "search-guide-desc": "If you can't spot it in the search results, type one of these keywords into the Play Store search box:",
           "copy-btn": "Copy",
-          "search-tip": "Tip: Use the full app name or include author code 'dy' to find it easily in search results.",
+          "search-tip": "Tip: Searching the app name alone usually works; if it doesn't show up, use the full name or add the author code 'dy'.",
           "feedback-title": "💬 Feedback & Support:",
           "feedback-desc": "Thank you to everyone testing and using the app! If you have any suggestions or feedback, feel free to email:",
           "orig-beta-group": "Original Beta Group:",
@@ -686,8 +690,8 @@
           "feat1-desc": "Plays the common audio formats already on your phone, and video files can be played as audio only. Playlists, play history and ID3 cover art included.",
           "feat5-title": "No Internet Permission",
           "feat5-desc": "This app does not request the internet permission, so it cannot upload anything even if it wanted to. No tracking, no data collection, no ads.",
-          "feat2-title": "Three Timer Modes",
-          "feat2-desc": "By time, by play count, or interval (play X minutes, rest Y minutes, repeat N rounds). The time mode also runs in reverse and can start playback when the countdown ends.",
+          "feat2-title": "Four Timer Modes",
+          "feat2-desc": "By time, by play count, interval by time (play X minutes, rest Y minutes, repeat N rounds), or interval by count (rest after every X tracks). When it ends it can stop, pause, exit, or start playback instead.",
           "feat3-title": "Dynamic Subtitles & Lyrics",
           "feat3-desc": "Supports SRT dynamic subtitles and static lyrics, with an adjustable time offset to line them up. Sing along, follow an audiobook, or study languages with ease.",
           "feat4-title": "Modern Aesthetic UI",
@@ -767,6 +771,18 @@
       document.addEventListener("click", function(){
         langSelectWrapper.classList.remove("open");
       });
+    })();
+
+    // Android 直接喚起 Play 商店 App（非 Android 維持原本的網頁連結）
+    (function(){
+      const link = document.getElementById("playstore-link");
+      if (!link || !/android/i.test(navigator.userAgent)) return;
+      const pkg = "com.dy.simpleaudioplayer";
+      const web = "https://play.google.com/store/apps/details?id=" + pkg;
+      link.href = "intent://details?id=" + pkg +
+        "#Intent;scheme=market;package=com.android.vending;" +
+        "S.browser_fallback_url=" + encodeURIComponent(web) + ";end";
+      link.removeAttribute("target");
     })();
 
     // Copy Text Toast
