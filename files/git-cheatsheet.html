@@ -75,6 +75,10 @@
     overflow-x: auto;
   }
   .cmd code { white-space: nowrap; }
+  /* 多行區塊。nowrap 要在 code 上一起解除，只設在外層的話換行會被吃成空白，
+     整段擠成一行。 */
+  .cmd.block { display: block; white-space: pre; line-height: 1.6; }
+  .cmd.block code { white-space: pre; }
   .copy {
     margin-left: auto; flex: none;
     border: 1px solid var(--line);
@@ -173,11 +177,19 @@
   </div>
   <div class="row">
     <div class="cmd"><code>git log --oneline --graph -20</code><button class="copy">複製</button></div>
-    <div class="desc">最近 20 筆提交，一行一筆。</div>
+    <div class="desc">最近 20 筆提交，一行一筆（只顯示標題）。</div>
   </div>
   <div class="row">
-    <div class="cmd"><code>git show HEAD</code><button class="copy">複製</button></div>
-    <div class="desc">看最後一次提交到底改了什麼。</div>
+    <div class="cmd"><code>git log -10</code><button class="copy">複製</button></div>
+    <div class="desc">最近 10 筆提交，<b>完整顯示所有說明與內文</b>。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git show --stat 代號</code><button class="copy">複製</button></div>
+    <div class="desc">看指定提交的<b>詳細說明內文</b>與修改檔案統計（代號可用 HEAD 代表最新版）。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git show 代號</code><button class="copy">複製</button></div>
+    <div class="desc">看指定提交的<b>詳細說明 + 逐行程式碼差異 (diff)</b>。</div>
   </div>
 </section>
 
@@ -214,6 +226,62 @@
 </section>
 
 <section>
+  <h2>回頭取舊版本</h2>
+  <p class="sub">想試試舊的做法、或把某個檔案退回幾天前的樣子。<b>不必開分支</b>。</p>
+  <div class="row">
+    <div class="cmd"><code>git log --oneline -20</code><button class="copy">複製</button></div>
+    <div class="desc">先找到目標版本的代號。開頭那串英數字就是，<b>前 7 碼就夠用</b>。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git show 代號:路徑/檔名</code><button class="copy">複製</button></div>
+    <div class="desc">只<b>看</b>舊版長什麼樣，不動到任何檔案。最安全的第一步。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git diff 代號 -- 路徑/檔名</code><button class="copy">複製</button></div>
+    <div class="desc">比對現在和那個版本差在哪，決定要不要換過去。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git checkout 代號 -- 路徑/檔名</code><button class="copy">複製</button></div>
+    <div class="desc">把<b>指定檔案</b>退回那個版本，其它檔案完全不受影響。這就是切換新舊做法的方法。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git checkout HEAD -- 路徑/檔名</code><button class="copy">複製</button></div>
+    <div class="desc">把檔案改回「最後一次提交」的樣子，也就是<b>取消上一行的動作</b>。</div>
+  </div>
+  <div class="note">
+    <b>關鍵是先 commit 再切換。</b>只要目前的版本已經提交（最好也 push 了），來回切換都是可逆的——新舊兩邊都躺在歷史裡，隨時拿得回來。反過來說，工作區還有<b>沒提交的修改</b>時去 checkout，那些修改會被直接蓋掉，而且救不回來。
+  </div>
+  <div class="desc" style="margin-top:1rem">
+    <b>實例</b>：做了一個實驗版，測完想比較新舊哪個好。
+  </div>
+  <div class="cmd block" style="margin-top:.5rem"><code>git add -A
+git commit -m "實驗：改用新做法"   # 先存起來，這樣才回得來
+git push                           # 推上去更保險
+
+git checkout HEAD~1 -- 檔案A 檔案B  # 這兩個檔案退回上一版，去測舊做法
+git checkout HEAD   -- 檔案A 檔案B  # 測完切回實驗版</code></div>
+  <div class="note">
+    <b>什麼時候才需要開分支？</b>當兩條線要<b>長期並行</b>、各自都會繼續提交的時候。像上面這種「試一下、比較完就決定留哪個」，commit 加 checkout 檔案就夠了，開分支反而多一層要管理的東西。
+  </div>
+</section>
+
+<section>
+  <h2>整個專案回到舊版本</h2>
+  <p class="sub">不是只有幾個檔案，而是想看看「那天的專案整體長什麼樣」。</p>
+  <div class="row">
+    <div class="cmd"><code>git checkout 代號</code><button class="copy">複製</button></div>
+    <div class="desc">整個工作區變成那個版本。會跳出一大段 <code>detached HEAD</code> 的警告，<b>那是正常的</b>，不是出錯。</div>
+  </div>
+  <div class="row">
+    <div class="cmd"><code>git switch -</code><button class="copy">複製</button></div>
+    <div class="desc">回到剛才所在的地方。忘記自己從哪來的話，用 <code>git switch master</code>。</div>
+  </div>
+  <div class="note danger">
+    <b>這個狀態下不要提交。</b><code>detached HEAD</code> 意思是「你不在任何分支上」，在這裡做的提交不屬於任何分支，切走之後就很難找回來。這個模式是<b>拿來看的，不是拿來改的</b>——真的想從舊版本繼續開發，要先 <code>git switch -c 新分支名</code> 幫它安一個家。
+  </div>
+</section>
+
+<section>
   <h2>暫時收起來（stash）</h2>
   <p class="sub">改到一半但想先做別的事，又不想留下半成品的提交。</p>
   <div class="row">
@@ -237,7 +305,7 @@
     原因是 Windows 用 CRLF 換行、Git 內部存 LF，設定沒講清楚時 Git 每次都會提醒你一遍。
     解法是在專案根目錄放一個 <code>.gitattributes</code>，把規則寫死在專案裡，就不會受各台電腦的設定影響：
   </div>
-  <div class="cmd" style="display:block; white-space:pre; line-height:1.6"><code>* text=auto eol=lf
+  <div class="cmd block"><code>* text=auto eol=lf
 
 *.bat text eol=crlf
 *.cmd text eol=crlf
